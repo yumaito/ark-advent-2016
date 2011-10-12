@@ -7,11 +7,11 @@
 昨日のフィードバック
 -----------------
 
-本日の内容に入る前に、昨日の内容で `use base` や `__PACKAGE__` がなにを意味しているかわからないという人がいましたので少し説明しておきます。
+本日の内容に入る前に、昨日の内容で `use parent` や `__PACKAGE__` がなにを意味しているかわからないという人がいましたので少し説明しておきます。
 
-    use base 'ClassName';
+    use parent 'ClassName';
 
-は ClassName と言うクラスを継承すると言う意味です。詳しくは `perldoc base` などを参照ください。
+は ClassName と言うクラスを継承すると言う意味です。詳しくは `perldoc parent` などを参照ください。
 
     __PACKAGE__
 
@@ -20,7 +20,7 @@
     package Jobeet::Schema;
     use strict;
     use warnings;
-    use base 'DBIx::Class::Schema';
+    use parent 'DBIx::Class::Schema';
     
     __PACKAGE__->load_namespaces;
     
@@ -82,6 +82,25 @@ Arkのモデルについての詳細は明日学習します。詳しいこと�
 
 と言う名前で Ark のモデルを定義したことになります。
 
+ところで、Schemaを追加する度に、定義を追加するのは面倒です。以下のようにすれば、Schema/Result/ 以下のファイルを
+探して、登録してくれます。もちろんこの場合、Module::Findモジュールの追加が必要なので、cpanmでインストールする
+と同時に、Makefile.PLへの追記を忘れずにしておきましょう。
+
+    {
+        my @tables = map {
+            my $module = $_;
+            (my $table = $module) =~ s/Jobeet::Schema::Result:://;
+            $table;
+        } Module::Find::findallmod('Jobeet::Schema::Result');
+
+        for my $table (@tables) {
+            register "Schema::${table}" => sub {
+                shift->get('Schema')->resultset($table);
+            };
+        }
+    }
+
+
 また
 
     my $conf = $self->get('conf')->{database}
@@ -123,7 +142,7 @@ Arkのモデルについての詳細は明日学習します。詳しいこと�
 
 お疲れさまでした。以上の作業で無事に Jobeet::Models は Jobeet アプリケーションのモデルクラスとして動作するようになります。
 
-今日は大変めんどくさいコードを書かせてしまいましたが、熟練した Ark プログラマーはこのようにアプリケーションを作成するたびに同じようなことを書くと言うことはしません。ark.pl で作成するアプリケーションのスケルトンは開発者が自由にカスタマイズすることが出来るようになっているのです。詳しくはドキュメントの[ひな形のテンプレートをカスタマイズする](http://opensource.kayac.com/ja/projects/ark/documents/ark#%E3%81%B2%E3%81%AA%E5%BD%A2%E3%81%AE%E3%83%86%E3%83%B3%E3%83%97%E3%83%AC%E3%83%BC%E3%83%88%E3%82%92%E3%82%AB%E3%82%B9%E3%82%BF%E3%83%9E%E3%82%A4%E3%82%BA%E3%81%99%E3%82%8B)を参照ください。
+今日は大変めんどくさいコードを書かせてしまいましたが、熟練した Ark プログラマーはこのようにアプリケーションを作成するたびに同じようなことを書くと言うことはしません。*TODO*
 
 スキーマのバージョニング
 --------------------
