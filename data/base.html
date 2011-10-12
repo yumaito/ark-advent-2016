@@ -4,7 +4,7 @@
 <title><? block title => '' ?></title>
 
 <link rel="stylesheet" type="text/css" media="all" href="./css/base/main.css" />
-<link rel="stylesheet" type="text/css" media="all" href="./js/pretify/pretify.css" />
+<link rel="stylesheet" type="text/css" media="all" href="./js/prettify/prettify.css" />
 
 <meta name="viewport" content="width=320" />
 <link rel="alternate" type="application/rss+xml" href="index.xml" />
@@ -12,9 +12,10 @@
 <body>
 <div id="container">
 
+<div id="main">
 <h1><a href="./"><? block 'title' ?></a></h1>
-
 <? block content => '' ?>
+</div>
 
 <div id="footer">
   <p><a href="http://www.symfony-project.org/jobeet/">Original jobeet tutorial</a> is licensed under <a href="http://creativecommons.org/licenses/by-sa/3.0/">cc by-sa 3.0</a> by <a href="http://www.symfony-project.org/">symfony project</a>.</p>
@@ -26,7 +27,7 @@
 
 
 <script type="text/javascript" src="js/jquery.js"></script>
-<script type="text/javascript" src="js/pretify/prettify.js"></script>
+<script type="text/javascript" src="js/prettify/prettify.js"></script>
 <script type="text/javascript" src="js/init.js"></script>
 </body>
 </html>
