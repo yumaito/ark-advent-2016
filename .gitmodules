@@ -1,0 +1,3 @@
+[submodule "site/css/base"]
+	path = site/css/base
+	url = git@github.com:Songmu/songmu_css_base.git
