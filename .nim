@@ -5,7 +5,7 @@ site_dir: ./site
 
 plugins:
   - module: Meta
-  - module: Markdown
+  - module: MultiMarkdown
 
   - module: AutoIndex
     config:
