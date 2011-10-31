@@ -7,36 +7,6 @@
 準備はいいですか？ 実現可能な実装について語りましょう。
 
 
-Ark のバージョンアップ
--------------------
-
-1日目から本文章を書いている間に、Ark の依存モジュールである Mouse の新バージョン（0.43）がリリースされました。
-すでに1日目の内容は更新していますが、もしあなたが1日目に Ark 0.11 を入れている場合 Ark のバージョンアップをする必要があります。（申し訳ありません！）
-
-1日目と同じ手順で Ark をインストールすることでバージョンアップが出来ます。
-
-    $ wget http://cloud.github.com/downloads/typester/ark-perl/Ark-0.12.tar.gz
-    $ tar -zxvf Ark-0.12.tar.gz
-    $ cd Ark-0.12
-    $ perl Makefile.PL
-    $ sudo -H make installdeps
-    $ make test
-    $ sudo make install
-
-簡単にまとめるとこのようになります。
-
-現在入っているバージョンを確認するためには、
-
-    $ perl -MArk\ 9999
-
-というようなコマンドを実行してみてください。
-
-    $ perl -MArk\ 9999
-    Ark version 9999 required--this is only version 0.12.
-    BEGIN failed--compilation aborted.
-
-このように 0.12 が入っていることがわかります。ここで、0.11（もしくはそれより低いバージョン）が表示される場合、上記を参考にしてまず Ark をバージョンアップしてください。
-
 依存モジュール
 ------------
 
