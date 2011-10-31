@@ -43,7 +43,7 @@ DBIx::Class で生成される SQL のデバッグ
 
 DBIx::Class が生成する SQL のデバッグ方法は実はすでに学んでいます。 DBIC_TRACE 環境変数を使用するのでした。
 
-    $ DBIC_TRACE=1 ark.pl server -d
+    $ DBIC_TRACE=1 plackup dev.psgi
 
 とすることで DBIx::Class が実行している SQL ステートメントをコンソール（STDERR）に表示させることが出来ます。
 
@@ -77,18 +77,12 @@ DBIx::Class が生成する SQL のデバッグ方法は実はすでに学んで
     sub insert {
         my $self = shift;
     
-        $self->expires_at( DateTime->now->add( days => 30 ) );
+        $self->expires_at( models('Schema')->now->add( days => 30 ) );
         $self->next::method(@_);
     }
 
 これで Job 新規登録時に `expires_at` が 30日後に自動的にセットされます。
 最後に `$self->next::method(@_);` としているのは他の場所で insert をフックしている場合にそちらのメソッドにも処理を投げると言う意味です。こうしておくことで ResultBase で定義した insert メソッドにも処理が回ります。
-
-また DateTime オブジェクトを使用しているので、クラス定義の最初のあたりに
-
-    use DateTime;
-
-と言う行も追加しておいてください。
 
 では、Job コントローラでの検索条件の指定も `expires_at` を使用するように変更してみましょう。
 
@@ -96,7 +90,7 @@ DBIx::Class が生成する SQL のデバッグ方法は実はすでに学んで
         my ($self, $c) = @_;
     
         $c->stash->{jobs} = models('Schema::Job')->search({
-            expires_at => { '>=', DateTime->now },
+            expires_at => { '>=', models('Schema')->now },
         });
     }
 
@@ -148,12 +142,12 @@ DBIx::Class が生成する SQL のデバッグ方法は実はすでに学んで
     my $home = Jobeet::Models->get('home');
     
     return {
-        active_days => 30,
+        default_view    => 'MT',
+        active_days     => 30,
     
         database => [
             'dbi:SQLite:' . $home->file('database.db'), '', '',
              {
-                 unicode        => 1,
                  sqlite_unicode => 1,
              },
         ],
@@ -168,7 +162,7 @@ DBIx::Class が生成する SQL のデバッグ方法は実はすでに学んで
     sub insert {
         my $self = shift;
     
-        $self->expires_at( DateTime->now->add( days => models('conf')->{active_days} ) );
+        $self->expires_at( models('Schema')->now->add( days => models('conf')->{active_days} ) );
         $self->next::method(@_);
     }
 
@@ -185,12 +179,15 @@ DBIx::Class が生成する SQL のデバッグ方法は実はすでに学んで
     package Jobeet::Schema::ResultSet::Job;
     use strict;
     use warnings;
-    use base 'DBIx::Class::ResultSet';
+    use utf8;
+    use parent 'DBIx::Class::ResultSet';
+    
+    use Jobeet::Models;
     
     sub get_active_jobs {
         my $self = shift;
     
-        $self = $self->search({ expires_at => { '>=', DateTime->now }, });
+        $self = $self->search({ expires_at => { '>=', models('Schema')->now }, });
     
         $self;
     }
@@ -219,13 +216,13 @@ Job コントローラからはこのモデルを使用するようにしてみ�
     sub get_active_jobs {
         my $self = shift;
     
-        $self = $self->search({ expires_at => { '>=', DateTime->now }, });
+        $self = $self->search({ expires_at => { '>=', models('Schema')->now }, });
         $self = $self->search({}, { order_by => { -desc => 'expires_at'} });
     
         $self;
     }
 
-ResultSet クラスの search メソッドの第一引数では検索条件 (WHERE CLAUSE) を指定するといいました、第二引数では検索の属性（LIMITやORDER BYなど）を指定します。また一度の search ですべてを指定することも出来ますし、上記の例のように search を何度も読んで条件を複数の場所に分けて絞り込んでいくことも可能です。
+ResultSet クラスの search メソッドの第一引数では検索条件 (WHERE CLAUSE) を指定するといいました、第二引数では検索の属性（LIMITやORDER BYなど）を指定します。また一度の search ですべてを指定することも出来ますし、上記の例のように search を何度も読んで条件を複数の場所に分けて絞り込んでいくことも可能です。絞り込んでいく場合は、メソッドチェーンのようにつなげて絞り込むことも可能です。
 
 ホームページでのカテゴリ表示
 ------------------------
@@ -247,7 +244,7 @@ ResultSet クラスの search メソッドの第一引数では検索条件 (WHE
         my $self = shift;
     
         $self->search(
-            { 'jobs.expires_at' => { '>=', DateTime->now } },
+            { 'jobs.expires_at' => { '>=', models('Schema')->now } },
             { join => 'jobs', group_by => 'me.name' },
         );
     }
@@ -304,7 +301,7 @@ Jobコントローラを以下のように、カテゴリをテンプレート�
         </div>
     ? } #endfor $category
     </div>
-    ? } #endblcok content
+    ? } #endblock content
     
     
 
@@ -337,7 +334,7 @@ Jobコントローラを以下のように、カテゴリをテンプレート�
         $attr->{rows} ||= 10;
     
         $self->jobs(
-            { expires_at => { '>=', DateTime->now } },
+            { expires_at => { '>=', models('Schema')->now } },
             {   order_by => { -desc => 'created_at' },
                 rows     => $attr->{rows},
             }
@@ -348,7 +345,7 @@ Jobコントローラを以下のように、カテゴリをテンプレート�
 
           <table class="jobs">
     ? my $i = 0;
-    ? my $max_rows = Jobeet::Models->get('conf')->{max_jobs_on_homepage};
+    ? my $max_rows = $c->config->{max_jobs_on_homepage};
     ? for my $job ($category->get_active_jobs({ rows => $max_rows })) {
 
 加えて、config.pl に新しい設定を追加します。:
