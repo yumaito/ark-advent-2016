@@ -11,7 +11,8 @@
 
     use parent 'ClassName';
 
-は ClassName と言うクラスを継承すると言う意味です。詳しくは `perldoc parent` などを参照ください。
+は ClassName と言うクラスを継承すると言う意味です。詳しくは `perldoc parent` などを参照ください。  
+(baseというモジュールもありますが現在はparentを使うことが推奨されています。こちらも詳しくは `perldoc base` を参照ください。)
 
     __PACKAGE__
 
