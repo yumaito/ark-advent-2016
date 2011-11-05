@@ -73,10 +73,9 @@ SQLite もしくは MySQL が使える環境であることを確認してくだ
 
 近年は、システム標準のPerlをそのまま使うのではなく、perlbrewとcpanmを組み合わせて、開発環境を構築するのが主流となっています。
 
-以下のコマンドを打てば、環境構築が可能です。Perlのバージョン等はリリースにあわせて適宜書き換えてください。
+以下のコマンドを打てば、環境構築が可能です。シェルの種類やPerlのバージョン等はリリースにあわせて適宜書き換えてください。
 
-    $ curl -L http://xrl.us/perlbrew | perl - install
-    $ ~/perl5/perlbrew/bin/perlbrew init
+    $ curl -kL http://xrl.us/perlbrewinstall | bash
     $ perlbrew install perl-5.12.4
     $ perlbrew switch perl-5.12.4
     
@@ -128,7 +127,7 @@ Ark は Catalyst ライクなルーティングを提供するルーティング
 
     $ cpanm Module::Install Module::Install::TestBase Module::Install::Repository Module::Install::AuthorTests
     $ cpanm https://github.com/typester/Path-AttrRouter/tarball/master
-    $ cpanm https://github.com/downloads/typester/ark-perl/tarball/master
+    $ cpanm https://github.com/typester/ark-perl/tarball/master
 
 URL 指定がうまくいかないことがあるかもしれません。その場合は wget 等で tarball をダウンロードしてきて、cpanm の
 引数に指定してください。
@@ -139,13 +138,41 @@ URL 指定がうまくいかないことがあるかもしれません。その�
 その場合は決して、--no-check-certificateオプション等を使ったりせず、証明書を追加するようにしましょう。
 
 
+Module::Setup のインストール
+----------------------------
+
+アプリケーションを作り始める場合、一から書き始めるのではなくスケルトンから作りはじめるのが普通でしょう。
+
+Ark 自身はスケルトン作成機構を持っていません。
+フレームワーク自体がスケルトン作成機能を持つよりかは、既存のひな形作成モジュールに任せてしまったほうが良いでしょう。車輪の再発明は必要ありません。
+
+ここでは、Module::Setup を使うことにしましょう。
+
+    $ cpanm Module::Setup
+
+Module::Setupは標準でModule::Setup::Flaver以下にひな形が幾つか定義されていますが、当然Ark用のひな形はありません。
+
+
+
+
+    $ cpanm https://github.com/Songmu/p5-Module-Setup-Flavor-ArkDBIC/tarball/master
+
+
+
+
+### module-setupのセットアップ
+
+    module-setup --init --flavor-class=ArkDBIC arkdbic
+
+名前やメールアドレス、バージョン管理ツールについて。
+
+
 アプリケーションの作成
 ------------------
 
-*TODO*
 それではアプリケーションを作成してみましょう。Ark では `ark.pl` と言うコマンドはありません。
 
-    $ ark.pl newapp Jobeet
+    $ module-setup --init Jobeet
 
 と実行すると
 
@@ -203,7 +230,7 @@ plackup の -E オプション(標準はdevelopment)により表示を変更で�
 
 ブラウザから `http://0.0.0.0:5000/` にアクセスしてみてください。
 
-    Ark Default Index *TODO*
+    Ark Default Index
 
 と言う文字が表示されましたか？ これは Ark アプリケーションが正常に起動していることを示します。
 
