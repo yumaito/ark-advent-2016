@@ -144,27 +144,30 @@ Module::Setup のインストール
 アプリケーションを作り始める場合、一から書き始めるのではなくスケルトンから作りはじめるのが普通でしょう。
 
 Ark 自身はスケルトン作成機構を持っていません。
-フレームワーク自体がスケルトン作成機能を持つよりかは、既存のひな形作成モジュールに任せてしまったほうが良いでしょう。車輪の再発明は必要ありません。
+フレームワーク自体がスケルトン作成機能を持つよりかは、既存のスケルトン作成モジュールに任せてしまったほうが良いでしょう。車輪の再発明は必要ありません。
 
-ここでは、Module::Setup を使うことにしましょう。
+ここでは、Module::Setup を使うことにしましょう。こちらもCPANからインストール可能です。
 
     $ cpanm Module::Setup
 
-Module::Setupは標準でModule::Setup::Flaver以下にひな形が幾つか定義されていますが、当然Ark用のひな形はありません。
+Module::Setupは標準でModule::Setup::Flavor以下にFlavor(スケルトン)が幾つか定義されていますが、当然Ark用のFlavorはありません。
 
-
-
+ゆくゆくは自分好みのFlavorを使うと良いと思いますが、今回は以下のFlavorを使うことにしましょう。
 
     $ cpanm https://github.com/Songmu/p5-Module-Setup-Flavor-ArkDBIC/tarball/master
-
-
-
 
 ### module-setupのセットアップ
 
     module-setup --init --flavor-class=ArkDBIC arkdbic
 
-名前やメールアドレス、バージョン管理ツールについて。
+名前やメールアドレス、バージョン管理ツールについて聞かれると思いますが、適宜入力してください。
+これでArkでアプリケーションを作成する準備は完了です。
+
+スケルトンは個人の好みもあるので、最初は他の人のものを使わせてもらっても良いと思いますが、自分が使いやすいようにカスタマイズしてみると良いでしょう。
+
+Module::Setup の使い方に関しては以下を参照してみてください。
+
+[Module::Setup でらくらくモジュール作成](http://perl-users.jp/articles/advent-calendar/2009/hacker/19.html)
 
 
 アプリケーションの作成
@@ -174,18 +177,7 @@ Module::Setupは標準でModule::Setup::Flaver以下にひな形が幾つか定�
 
     $ module-setup --init Jobeet
 
-と実行すると
-
-    $ ark.pl newapp Jobeet
-    Creating directory Jobeet
-    Creating Jobeet/Makefile.PL
-    Creating Jobeet/lib/Jobeet.pm
-    Creating Jobeet/lib/Jobeet/Controller.pm
-    Creating directory Jobeet/root
-    Creating Jobeet/t/00_compile.t
-    Creating directory Jobeet/tmp
-
-のように `Jobeet` ディレクトリが作成され、その中にアプリケーションのスケルトンが作成されます。
+`Jobeet` ディレクトリが作成され、その中にアプリケーションのスケルトンが作成されます。
 
 
 アプリケーションディレクトリの構成

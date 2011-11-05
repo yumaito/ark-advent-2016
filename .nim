@@ -8,5 +8,6 @@ plugins:
   - module: MultiMarkdown
 
   - module: AutoIndex
+  - module: AutoIndex
     config:
       filename: index.xml
