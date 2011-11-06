@@ -265,7 +265,7 @@ job/index.mt、category/show.mt はどちらも jobs.css を参照していま�
 content ブロックの table の中身も二つのテンプレートで同じものが含まれていることに気がつくでしょう。
 テンプレートの一部を再利用する必要があるとき、パーシャルテンプレートを作る必要があります。パーシャルは複数のテンプレートの間で共有できるテンプレートのスニペットです。
 
-root/job/partial_jobs.mt として以下のようなテンプレートを作りましょう：
+root/job/_partial_jobs.mt として以下のようなテンプレートを作りましょう：
 
     ? my @jobs = @_;
     <table class="jobs">
@@ -287,7 +287,7 @@ root/job/partial_jobs.mt として以下のようなテンプレートを作り�
 
 そして `include` ヘルパーを利用することでパーシャルテンプレートをインクルードできます：
 
-    <?= include('job/partial_jobs', @jobs) ?>
+    <?= include('job/_partial_jobs', @jobs) ?>
 
 第二引数目以降はテンプレートに渡す引数そのままになります。
 
@@ -295,11 +295,11 @@ root/job/partial_jobs.mt として以下のようなテンプレートを作り�
 
 root/job/index.mt:
 
-    ?= include('job/partial_jobs', $category->get_active_jobs({ rows => $max_rows }));
+    ?= include('job/_partial_jobs', $category->get_active_jobs({ rows => $max_rows }));
 
 root/category/show.mt:
 
-    ?= include('job/partial_jobs', $category->get_active_jobs);
+    ?= include('job/_partial_jobs', $category->get_active_jobs);
 
 
 リストのパジネーション
