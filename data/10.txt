@@ -94,7 +94,7 @@ URLでうけとった token をもとに求人をさがし、みつかったら 
       <h1><?= $job->company ?></h1>
       <h2><?= $job->location ?></h2>
       <h3>
-        <?= $job->category->name ?>    <small> - <?= $job->type ?></small>
+        <?= $job->category ?>    <small> - <?= $job->type ?></small>
       </h3>
     
       <div class="description">
@@ -116,7 +116,7 @@ URLでうけとった token をもとに求人をさがし、みつかったら 
 ただしくプレビュー画面が表示されましたか？
 
 この状態ではプレビューからさきへ進むことができません。編集や削除へのリンクを追加していきます。
-ここで、編集画面ではまた同じようなフォームをつくるでしょう。フォーム部分は `job/partial_form.mt` としてパーシャル化しておきましょう：
+ここで、編集画面ではまた同じようなフォームをつくるでしょう。フォーム部分は `job/_partial_form.mt` としてパーシャル化しておきましょう：
 
     ? my $form = shift;
     
@@ -159,7 +159,7 @@ URLでうけとった token をもとに求人をさがし、みつかったら 
     
     <h1>New Job</h1>
     
-    ?= include('job/partial_form', $form);
+    ?= include('job/_partial_form', $form);
     
     ? } # endblock content
 
@@ -173,7 +173,7 @@ URLでうけとった token をもとに求人をさがし、みつかったら 
     
     <h1>Edit Job</h1>
     
-    ?= include('job/partial_form', $form);
+    ?= include('job/_partial_form', $form);
     
     ? } # endblock content
 
