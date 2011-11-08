@@ -75,10 +75,12 @@ SQLite もしくは MySQL が使える環境であることを確認してくだ
 
 以下のコマンドを打てば、環境構築が可能です。シェルの種類やPerlのバージョン等はリリースにあわせて適宜書き換えてください。
 
-    $ curl -kL http://xrl.us/perlbrewinstall | bash
+    $ curl -L http://xrl.us/perlbrew | perl - install
+    $ ~/perl5/perlbrew/bin/perlbrew init
+    $ echo 'source ~/perl5/perlbrew/etc/bashrc' >> ~/.bashrc
+    $ source ~/.bashrc
     $ perlbrew install perl-5.12.4
     $ perlbrew switch perl-5.12.4
-    
     $ curl -L http://cpanmin.us | perl - --self-upgrade
 
 これで、Perl5.12.4の開発環境が整いました。cpanmというコマンドも使えるようになっていると思います。
@@ -125,7 +127,7 @@ Ark は Catalyst ライクなルーティングを提供するルーティング
 
 ### インストール
 
-    $ cpanm Module::Install Module::Install::TestBase Module::Install::Repository Module::Install::AuthorTests
+    $ cpanm Module::Install::TestBase Module::Install::Repository Module::Install::AuthorTests
     $ cpanm https://github.com/typester/Path-AttrRouter/tarball/master
     $ cpanm https://github.com/typester/ark-perl/tarball/master
 
@@ -173,7 +175,7 @@ Module::Setup の使い方に関しては以下を参照してみてください
 アプリケーションの作成
 ------------------
 
-それではアプリケーションを作成してみましょう。Ark では `ark.pl` と言うコマンドはありません。
+それではアプリケーションを作成してみましょう。
 
     $ module-setup Jobeet
 
@@ -190,7 +192,7 @@ Module::Setup の使い方に関しては以下を参照してみてください
  * tmp - キャッシュ、fcgiのソケットなど一時的なファイルを置くディレクトリ
  * t - アプリケーションのテストコードを置くディレクトリ
 
-ファイルの役割は
+ファイルの役割は以下のようになります。
 
  * Makefile.PL - Makefileを作成するスクリプト、依存モジュールの定義などを行う
  * lib/Jobeet.pm - アプリケーションメインクラス
@@ -202,8 +204,8 @@ Module::Setup の使い方に関しては以下を参照してみてください
 
 Ark は Plack に対応しているので、以下のコマンドで簡単にスケルトンアプリケーションを起動できます。
 
-    $ plackup -r app.psgi
-    Watching ./lib app.psgi for file updates.
+    $ plackup -r dev.psgi
+    Watching ./lib dev.psgi for file updates.
     [debug] Loaded Path actions:
     .-------------------------------------+--------------------------------------.
     | Path                                | Private                              |
@@ -249,6 +251,4 @@ mac の場合
 はい、今日はここまでです。まだ Perl コードを一行も書いていませんが、Ark の開発環境をセットアップし、アプリケーションのスケルトンを作成することができました。
 
 明日は、アプリケーションが何を行うのかを明らかにしチュートリアルの間に実装する必要のある要件を話します。
-
-
 
