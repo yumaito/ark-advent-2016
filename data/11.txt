@@ -141,14 +141,9 @@ prove コマンドは Test::Harness モジュールがインストールされ�
 
 大抵の環境で、既にインストールされていると思いますが、インストールされていない場合は、[一日目](http://opensource.kayac.com/ja/projects/ark/advent/2009/01.html)に行ったように
 
-    $ sudo -H cpan
-    
-として cpan シェルを起動し
+    $ cpanm Test::Harness
 
-    cpan> install Test::Harness
-    
 を実行して、Test::Harness をインストールしましょう。
-
 
 prove コマンドには、よく使われるいくつかのオプションがあります:
 

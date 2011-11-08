@@ -175,7 +175,7 @@ Module::Setup の使い方に関しては以下を参照してみてください
 
 それではアプリケーションを作成してみましょう。Ark では `ark.pl` と言うコマンドはありません。
 
-    $ module-setup --init Jobeet
+    $ module-setup Jobeet
 
 `Jobeet` ディレクトリが作成され、その中にアプリケーションのスケルトンが作成されます。
 
