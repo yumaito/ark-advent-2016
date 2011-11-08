@@ -43,7 +43,7 @@ Arkを使ったプロジェクトのテストには、CPAN上にある数多のT
 
             models('conf')->{database} = [
                 "dbi:SQLite:$dir/jobeet-test-database.db", undef, undef,
-                { unicode => 1, ignore_version => 1 },
+                { sqlite_unicode => 1, ignore_version => 1 },
             ];
             models('Schema')->deploy;
         }
@@ -51,6 +51,8 @@ Arkを使ったプロジェクトのテストには、CPAN上にある数多のT
         @_ = ($class, $app, %options);
         goto $class->can('SUPER::import');
     }
+    
+    1;
 
 テストの先頭で `use Jobeet::Test;` すると、テスト用の新しいデータベースが自動的に作成され、接続先に設定されます。
 新しく作成されたテスト用のデータベースは、テストスクリプトが終了すると自動的に破棄されるので、本番のデータを壊す事無くテストを行う事ができるようになります。
@@ -71,40 +73,14 @@ Arkを使ったプロジェクトのテストには、CPAN上にある数多のT
 `Test::More` はいくつかのテスト用関数を提供します。
 その中から特に良く使われる物をリストアップします:
 
-<table cellspacing="0" class="doc_table">
-<thead>
-<tr>
-  <th>メソッド</th>
-  <th>説明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-  <td><code>ok($test)</code></td>
-  <td>条件をテストしてtrueであれば通る</td>
-</tr>
-<tr>
-  <td><code>is($value1, $value2)</code></td>
-  <td>2つの値を比較してそれらが等しい場合に通る</td>
-</tr>
-<tr>
-  <td><code>isnt($value1, $value2)</code></td>
-  <td>2つの値を比較しそれが等しくない場合に通る</td>
-</tr>
-<tr>
-  <td><code>like($string, $regexp)</code></td>
-  <td>文字列を正規表現でテストする</td>
-</tr>
-<tr>
-  <td><code>unlike($string, $regexp)</code></td>
-  <td>文字列が正規表現にマッチしないことをチェックする</td>
-</tr>
-<tr>
-  <td><code>is_deeply($array1, $array2)</code></td>
-  <td>2つの配列 or 連想配列が同じ値を持っていることをチェックする</td>
-</tr>
-</tbody>
-</table>
+メソッド                     | 説明                                                        |
+-----------------------------|-------------------------------------------------------------|
+`ok($test)`                  | 条件をテストしてtrueであれば通る                            |
+`is($value1, $value2)`       | 2つの値を比較してそれらが等しい場合に通る                   |
+`isnt($value, $value2)`      | 2つの値を比較しそれが等しくない場合に通る                   |
+`like($string, $regexp)`     | 文字列を正規表現でテストする                                |
+`unlike($string, $regexp)`   | 文字列を正規表現にマッチしないことをチェックする            |
+`is_deeply($array1, $array2` | 2つの配列 or 連想配列が同じ値を持っていることをチェックする |
 
 
 ### jobeet_test.t
@@ -147,34 +123,17 @@ prove コマンドは Test::Harness モジュールがインストールされ�
 
 prove コマンドには、よく使われるいくつかのオプションがあります:
 
-<table cellspacing="0" class="doc_table">
-<thead>
-<tr>
-  <th>オプション</th>
-  <th>説明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-  <td><code>-l</code></td>
-  <td>実行時にlibディレクトリをライブラリパスに加えます</td>
-</tr>
-<tr>
-  <td><code>-r</code></td>
-  <td>テストを再帰的に実行します</td>
-</tr>
-<tr>
-  <td><code>-v</code></td>
-  <td><code>出力を冗長にします</code></td>
-</tr>
-</tbody>
-</table>
+オプション  | 説明                                              |
+------------|---------------------------------------------------|
+-l          | 実行時にlibディレクトリをライブラリパスに加えます |
+-r          | テストを再帰的に実行しまう                        |
+-v          | 出力を冗長にします                                |
 
 
 それでは、先程書いた jobeet_test.t を実行してみましょう!
 Jobeetプロジェクトのrootディレクトリに移動して、`prove -lr t/jobeet_test.t`を実行します。
 
-    $ prove -l t/jobeet_test.t
+    $ prove -l t/01_jobeet_test.t
 
     t/jobeet_test.t .. ok
     All tests successful.
@@ -236,7 +195,7 @@ Schema クラスのテストを書く
 
 それでは実行してみましょう。
 
-    $ prove -l t/jobeet_schema_result_job.t
+    $ prove -l t/02_jobeet_schema_result_job.t
 
     t/jobeet_schema_result_job.t .. ok
     All tests successful.
@@ -260,7 +219,7 @@ Schema クラスのテストを書く
 
 それでは、実行してみます。
 
-    $ prove -l t/jobeet_schema_result_job.t
+    $ prove -l t/02_jobeet_schema_result_job.t
 
     t/jobeet_schema_result_job.t .. ok
     All tests successful.
@@ -270,7 +229,7 @@ Schema クラスのテストを書く
 おめでとうございます!! 全てのテストが通りました。
 良い区切りなので、testsの数が 4 だということを`Test::More`に教えてあげます。
 
-最終的に `jobeet_schema_result_job.t` は次のようになりました。
+最終的に `02_jobeet_schema_result_job.t` は次のようになりました。
 
     use strict;
     use warnings;
