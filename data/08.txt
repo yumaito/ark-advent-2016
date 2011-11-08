@@ -55,11 +55,11 @@ slug カラムの追加
 
 カラムを更新したので新しい DDL ファイルを作成しましょう。
 
-    $ perl ./script/create_ddl.pl
+    $ perl ./script/dev/create_ddl.pl
 
 そしてここでデータベースもアップグレードと行きたいところですが、以下のコマンドを実行すると
 
-    $ perl ./script/upgrade_database.pl
+    $ perl ./script/dev/upgrade_database.pl
     ...
     DBIx::Class::Schema::Versioned::upgrade(): DBI Exception: DBD::SQLite::db do failed: Cannot add a NOT NULL column with default value NULL [for Statement "ALTER TABLE jobeet_category ADD COLUMN slug VARCHAR(255) NOT NULL"]
 
@@ -98,8 +98,8 @@ INSERT 時には常に name から slug を作成し、UPDATE 時には name が
 そして以下の手順でデータベースを更新しましょう。
 
     $ rm database.db
-    $ perl ./script/upgrade_database.pl
-    $ perl ./script/insert_default_data.pl
+    $ perl ./script/dev/upgrade_database.pl
+    $ perl ./script/dev/insert_default_data.pl
 
 これで slug つきのデフォルトデータが作成されました。
 
