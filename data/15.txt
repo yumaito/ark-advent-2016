@@ -26,8 +26,7 @@
 
 バックエンドに使用する Cache::FastMmap をインストールしておきましょう。
 
-    $ sudo -H cpan
-    cpan> install Cache::FastMmap
+    $ cpanm Cache::FastMmap
 
 
 バックエンドモジュールをモデルとして登録
