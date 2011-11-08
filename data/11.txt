@@ -154,7 +154,7 @@ Schema クラスのテストを書く
 
 ### Jobeet::Schema::Result::Job
 
-[3日目](http://opensource.kayac.com/ja/projects/ark/advent/2009/03.html)に登場した `Jobeet::Schema::Result::Job` のテストから書いていきます。
+[3日目](./03.html)に登場した `Jobeet::Schema::Result::Job` のテストから書いていきます。
 
 
 基本的な所からテストを始める事が好ましいので、最初にデータの作成が正しく行われるかをテストすることにしましょう。
@@ -281,7 +281,7 @@ Schema クラスのテストを書く
 若者は喜び、`Jobeet`を利用しているユーザーはサービスが安定して動いてる事に満足を得てくれるでしょう。
 
 さあ、テストを書いていきましょう。
-`jobeet_schema_result_category.t` ファイルを作り、そこに `Jobeet::Schema::Result::Category` のテストを書いていきます。
+`01_jobeet_schema_result_category.t` ファイルを作り、そこに `Jobeet::Schema::Result::Category` のテストを書いていきます。
 
 まず始めに、`insert` 時に `slug` カラムが適切に作られているかをテストします。
 
@@ -304,9 +304,9 @@ Schema クラスのテストを書く
 
 実行してみます。
 
-    $ prove -lr t/jobeet_schema_result_category.t
+    $ prove -lr t/03_jobeet_schema_result_category.t
 
-    t/jobeet_schema_result_category.t .. ok
+    t/03_jobeet_schema_result_category.t .. ok
     All tests successful.
     Files=1, Tests=1,  1 wallclock secs ( 0.03 usr  0.01 sys +  0.50 cusr  0.08 csys =  0.62 CPU)
     Result: PASS
@@ -324,59 +324,14 @@ Schema クラスのテストを書く
 
     $ prove -lr t/jobeet_schema_result_category.t
 
-    #   Failed test 'slug column: update slug column automatically'
-    #   at t/jobeet_schema_result_category.t line 17.
-    #          got: 'camel_case'
-    #     expected: 'updated_category_name'
-    # Looks like you failed 1 test of 2.
-    t/jobeet_schema_result_category.t .. Dubious, test returned 1 (wstat 256, 0x100)
-    Failed 1/2 subtests
-
-    Test Summary Report
-    -------------------
-    t/jobeet_schema_result_category.t (Wstat: 256 Tests: 2 Failed: 1)
-      Failed test:  2
-      Non-zero exit status: 1
-    Files=1, Tests=2,  1 wallclock secs ( 0.02 usr  0.01 sys +  0.52 cusr  0.07 csys =  0.62 CPU)
-    Result: FAIL
-    exit 1
-
-なんと、失敗してしまいました!
-テストを確認しましたが、テストが間違っている訳ではないようです。
-どうやらプログラムにバグがあり、期待通りの動作をしていないようです。
-しかし、テストが通らなかった事で悲観的になる必要はありません。これは非常に良い事です。テストを書く事によって既存のコードのバグを見つける事ができました。
-後は、このテストが `pass` するようにプログラムを修正するだけです。
-
-失敗しているテストから問題のある部分が想像できます。 おそらく `Jobeet::Schema::Result::Category` の `update` メソッド部分の実装に問題があるのでしょう。
-[8日目](http://opensource.kayac.com/ja/projects/ark/advent/2009/08.html)の `slug カラムの追加` で追加した部分ですね。
-
-調査の結果、`name` カラムへの変更を `is_changed` でチェックしている処理に問題があることがわかったので、`is_column_changed` を使ったコードに修正しました。
-
-    sub update {
-        my $self = shift;
-
-        if ($self->is_column_changed('name')) {
-            $self->slug( decamelize $self->name );
-        }
-
-        $self->next::method(@_);
-    }
-
-テストを実行してみましょう。
-
-    $ prove -lr t/jobeet_schema_result_category.t
-
     t/jobeet_schema_result_category.t .. ok
     All tests successful.
     Files=1, Tests=2,  1 wallclock secs ( 0.03 usr  0.00 sys +  0.55 cusr  0.08 csys =  0.66 CPU)
     Result: PASS
 
-プログラムが正しく修正されたことで、全てのテストが成功するようになりました。
-1つのバグが修正され、さらにテストを書いた事により同じバグが再発する可能性も低い物となりました。
-
 最後にテストの数を`Test::More`に教えてあげます。
 
-最終的に `jobeet_schema_result_category.t` のコードは、次のようになりました。
+最終的に `02_jobeet_schema_result_category.t` のコードは、次のようになりました。
 
     use strict;
     use warnings;
@@ -400,16 +355,13 @@ Schema クラスのテストを書く
 
     done_testing;
 
-先程話題に上がった `is_column_changed` のドキュメントは [http://search.cpan.org/dist/DBIx-Class/lib/DBIx/Class/Row.pm#is_column_changed](http://search.cpan.org/dist/DBIx-Class/lib/DBIx/Class/Row.pm#is_column_changed) にあります。
-この章を読んだ後に余力があったら読んでみてください。
-
-続いて[7日目](http://opensource.kayac.com/ja/projects/ark/advent/2009/07.html)で作成した`Jobeet::Schema::ResultSet::Category`のテストを書いて行きます。
+続いて[7日目](./07.html)で作成した`Jobeet::Schema::ResultSet::Category`のテストを書いて行きます。
 
 
 ### Jobeet::Schema::ResultSet::Category
 
 
-`jobeet_schema_resultset_category.t`ファイルを作り、`Jobeet::Schema::ResultSet::Category`のテストを書いていきます。
+`04_jobeet_schema_resultset_category.t`ファイルを作り、`Jobeet::Schema::ResultSet::Category`のテストを書いていきます。
 
 
 まずはテストに使うデータを作成します。
@@ -442,7 +394,7 @@ Schema クラスのテストを書く
     my $first_job = models('Schema::Category')->get_with_jobs->first;
     is $first_job->id, $programming_job->id, 'get_with_jobs: got $programming_job';
 
-[7日目](http://opensource.kayac.com/ja/projects/ark/advent/2009/07.html)に実装した通り、`get_with_jobs`は少なくとも1つの利用可能な求人から全てのカテゴリを取得するメソッドです。
+[7日目](./07.html)に実装した通り、`get_with_jobs`は少なくとも1つの利用可能な求人から全てのカテゴリを取得するメソッドです。
 言い換えると、期限が切れている`job`しかないカテゴリは習得しない、ということになります。
 期待通りの動作をするかテストしましょう。
 
@@ -457,7 +409,7 @@ Schema クラスのテストを書く
 
 テストを実行します。
 
-    prove -l t/jobeet_schema_resultset_category.t
+    prove -l t/04_jobeet_schema_resultset_category.t
 
     t/jobeet_schema_resultset_category.t .. ok
     All tests successful.
@@ -523,7 +475,7 @@ Schema クラスのテストを書く
 
 ### Jobeet::Schema::Result::Category 再び
 
-[7日目](http://opensource.kayac.com/ja/projects/ark/advent/2009/07.html)で、カテゴリResultオブジェクトにアクティブな求人を返す `get_active_jobs` メソッドを追加しました。
+[7日目](./07.html)で、カテゴリResultオブジェクトにアクティブな求人を返す `get_active_jobs` メソッドを追加しました。
 
 `get_active_jobs` に期待する振る舞いは次のようになります:
 
@@ -780,10 +732,10 @@ Schema クラスのテストを書く
 今日頑張ってテストを書いたので、`t/` ディレクトリの下には
 
 - 00\_compile\.t
-- jobeet\_schema\_result_category\.t
-- jobeet\_schema\_result\_job\.t
-- jobeet\_schema\_resultset\_category\.t
-- jobeet\_test\.t
+- 01_jobeet\_test\.t
+- 02_jobeet\_schema\_result\_job\.t
+- 03_jobeet\_schema\_result_category\.t
+- 04jobeet\_schema\_resultset\_category\.t
 
 の5つのテストがある状態になりました。
 全てのテストが成功し、プロジェクトが健全な状態にあるか確かめましょう。
