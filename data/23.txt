@@ -11,6 +11,17 @@ Ark は Plackに対応したフレームワークですので、多くのWebサ�
 
 Plack を使用すると様々な環境を意識することなくコードをかけるようにしてくれるとともに、対応する環境すべてで動作するアプリケーションを書くことができます。
 
+動作環境の一例
+-------------
+
+2011年現在、一般的なPlackアプリケーションで使われている構成は以下のようになっています。
+
+- Nginx or Apacheを前段に立てリバースプロキシと静的ファイル配信に利用
+- アプリケーションサーバーは Starman or Starlet
+- graceful restartのために、Server::Starterのstart_serverで起動
+- 上記プロセスをdaemontools or supervisord でdaemon化
+
+ただし、動作環境の定番は年々変化します。
 
 
 また明日
