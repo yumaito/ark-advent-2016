@@ -61,8 +61,8 @@ Jobeet のフィード追加に関して、求職者はリアルタイムで新�
 デフォルトデータを作り直しておきましょう：
 
     $ rm database.db
-    $ perl ./script/upgrade_database.pl
-    $ perl ./script/insert_default_data.pl
+    $ perl ./script/dev/upgrade_database.pl
+    $ perl ./script/dev/insert_default_data.pl
 
 
 求人情報のWebサービス
@@ -186,6 +186,9 @@ Webサービスをテストを書いておきましょう：
     
     done_testing;
     
+
+テストを書いたらちゃんと動かしておきましょう。
+
 
 また明日
 -------
