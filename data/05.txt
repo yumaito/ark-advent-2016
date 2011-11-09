@@ -34,7 +34,7 @@ MVC パターンをはじめたばかりの初心者によくある間違いと�
 とりあえずテンプレートに対応する View を作成してみましょう。Ark ではデフォルトでいくつかのテンプレートエンジンに対応していますが、このチュートリアルでは Text::Microtemplate のビューを使用します。
 以下のコマンドを実行してください。
 
-    $ ark.pl view MT View::MT
+    $ script/dev/skeleton.pl view MT
 
 これで Ark::View::MT を継承した Jobeet::View::MT クラスが自動的に作成されます。
 
@@ -324,9 +324,9 @@ content ブロックの中では先ほどコントローラからわたされた
 
 ここまででジョブの一覧ページはうまく動くはずです。以下のコマンドで開発サーバーを立ち上げて見てください。
 
-    $ ark.pl server -d
+    $ plackup -r dev.psgi
 
-そしてブラウザーで `http://127.0.0.1:4423/job/` にアクセスしてみてください。
+そしてブラウザーで `http://127.0.0.1:5000/job/` にアクセスしてみてください。
 
 ![homepage](http://www.symfony-project.org/images/jobeet/1_2/04/homepage.png)
 
