@@ -494,7 +494,7 @@ Affiliate クラス:
 また、使用頻度の高い定義に関しては、定数関数用のモジュールを作ってそれを読み込んで使っても良いかもしれません。
 
 
-    package Jobeet::Schema::Definition;
+    package Jobeet::Schema::Types;
     use parent 'Exporter';
     our @EXPORT qw/PK_INTEGER INTEGER VARCHAR TINYINT DATETIME/;
     
@@ -551,7 +551,7 @@ Affiliate クラス:
     use strict;
     use warnings;
     use parent 'Jobeet::Schema::ResultBase';
-    use Jobeet::Schema::Definition;
+    use Jobeet::Schema::Types;
     
     __PACKAGE__->table('jobeet_affiliate');
     
