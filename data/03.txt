@@ -672,7 +672,7 @@ Result クラスのベースクラス（`Jobeet::Schema::ResultBase`）にその
     sub insert {
         my $self = shift;
     
-        my $now = DateTime->now;
+        my $now = models('Schema')->now;
         $self->created_at( $now ) if $self->can('created_at');
         $self->updated_at( $now ) if $self->can('updated_at');
     
@@ -683,7 +683,7 @@ Result クラスのベースクラス（`Jobeet::Schema::ResultBase`）にその
         my $self = shift;
     
         if ($self->can('updated_at')) {
-            $self->updated_at( DateTime->now );
+            $self->updated_at( models('Schema')->now );
         }
     
         $self->next::method(@_);

@@ -28,7 +28,7 @@ DBIx::Class での 検索条件
         my ($self, $c) = @_;
     
         $c->stash->{jobs} = models('Schema::Job')->search({
-            created_at => { '>=', DateTime->now->add( days => -30 ) },
+            created_at => { '>=', models('Schema')->now->add( days => -30 ) },
         });
     }
 
@@ -311,7 +311,7 @@ Jobコントローラを以下のように、カテゴリをテンプレート�
         my $self = shift;
     
         $self->jobs(
-            { expires_at => { '>=', DateTime->now } },
+            { expires_at => { '>=', models('Schema')->now } },
             { order_by => { -desc => 'created_at' } }
         );
     }

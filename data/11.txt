@@ -400,7 +400,7 @@ Schema クラスのテストを書く
 
 `DateTime` モジュールを使うのでコードの先頭に `use DateTime;` を追加してください。
 
-    my $yesterday = DateTime->now->subtract( days => 1 );
+    my $yesterday = models('Schema')->now->subtract( days => 1 );
 
     # Now, $programming_job expires
     $programming_job->update({ expires_at => $yesterday });
@@ -462,7 +462,7 @@ Schema クラスのテストを書く
         }
         
         {
-            my $yesterday = DateTime->now->subtract( days => 1 );
+            my $yesterday = models('Schema')->now->subtract( days => 1 );
     
             # Now, $programming_job expires
             $programming_job->update({ expires_at => $yesterday });
@@ -560,7 +560,7 @@ Schema クラスのテストを書く
 
 `$design_job_2` の `expires_at` を昨日に設定すると期限切れになるので `$design_category->get_active_jobs` の返す結果セットには含まれなくなり `$design_category->get_active_jobs->count` は2を返す筈です。
 
-    my $yesterday = DateTime->now->subtract( days => 1 );
+    my $yesterday = models('Schema')->now->subtract( days => 1 );
     $design_job_2->update({ expires_at => $yesterday });
 
     is $design_category->get_active_jobs->count, 2, 'get_active_jobs: $design_job_2 が期限切れになったので get_active_jobs の返り値に含まれなくなった';
@@ -571,7 +571,7 @@ Schema クラスのテストを書く
 `$design_job_1` の `作成日時` を現在に、`$design_job_3` の `作成日時` を一時間前に設定します。
 この状態で `$design_category->get_active_jobs->first` を実行すると、時間軸で後に作られた `$design_job_1` が返ってくる筈です。
 
-    my $now = DateTime->now;
+    my $now = models('Schema')->now;
     my $one_hour_ago = $now->clone->subtract( hours => 1);
     my $tomorrow = $now->clone->add( days => 1 );
 
@@ -677,14 +677,14 @@ Schema クラスのテストを書く
         is $design_category->get_active_jobs->count, 3, 'get_active_jobs: 3つ登録したjobの習得';
     
         {
-            my $yesterday = DateTime->now->subtract( days => 1 );
+            my $yesterday = models('Schema')->now->subtract( days => 1 );
             $design_job_2->update({ expires_at => $yesterday });
     
             is $design_category->get_active_jobs->count, 2, 'get_active_jobs: $design_job_2 が期限切れになったので get_active_jobs の返り値に含まれなくなった';
         }
     
         {
-            my $now = DateTime->now;
+            my $now = models('Schema')->now;
             my $one_hour_ago = $now->clone->subtract( hours => 1);
             my $tomorrow = $now->clone->add( days => 1 );
     

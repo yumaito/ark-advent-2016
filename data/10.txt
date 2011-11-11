@@ -49,7 +49,7 @@ token は求人作成時に自動的に発行されるようにしましょう�
     sub create_from_form {
         my ($self, $form) = @_;
     
-        my $txn_guard = $self->result_source->schema->txn_scope_guard;
+        my $txn_guard = models('Schema')->txn_scope_guard;
     
         my $category_id = delete $form->params->{category};
         my $category = models('Schema::Category')->find({ slug => $category_id })
@@ -266,7 +266,7 @@ POST メソッド以外のリクエストの場合はフォームをDBの内容�
     
     sub days_before_expired {
         my ($self) = @_;
-        ($self->expires_at - DateTime->now)->days;
+        ($self->expires_at - models('Schema')->now)->days;
     }
     
     sub expires_soon {
@@ -315,7 +315,7 @@ POST メソッド以外のリクエストの場合はフォームをDBの内容�
         my $attr = shift || {};
     
         $self->jobs(
-            { expires_at => { '>=', DateTime->now }, is_activated => 1 },
+            { expires_at => { '>=', models('Schema')->now }, is_activated => 1 },
             {   order_by => { -desc => 'created_at' },
                 defined $attr->{rows} ? ( rows => $attr->{rows} ) : (),
                 defined $attr->{page} ? ( page => $attr->{page} ) : (),
