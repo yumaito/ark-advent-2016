@@ -166,7 +166,7 @@ DBIx::Class はデータベースのバージョニングをサポートする�
     package Jobeet::Schema;
     use strict;
     use warnings;
-    use base 'DBIx::Class::Schema';
+    use parent 'DBIx::Class::Schema';
     
     our $VERSION = '0';
     
