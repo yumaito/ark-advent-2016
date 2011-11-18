@@ -131,7 +131,12 @@ Ark は Catalyst ライクなルーティングを提供するルーティング
     $ cpanm https://github.com/typester/Path-AttrRouter/tarball/master
     $ cpanm https://github.com/typester/ark-perl/tarball/master
 
-URL 指定がうまくいかないことがあるかもしれません。その場合は wget 等で tarball をダウンロードしてきて、cpanm の
+URL 指定だとうまくいかない場合、cpanmで使っているバックエンドモジュールがSSLに対応していないのかもしれません。
+先にLWP::Protocol::httpsを入れてみて下さい。
+
+    $ cpanm LWP::Protocol::https
+
+それでも上手くいかない場合は wget 等で tarball をダウンロードしてきて、cpanm の
 引数に指定してください。
 
     $ cpanm Ark.tar.gz
