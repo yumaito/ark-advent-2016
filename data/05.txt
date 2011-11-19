@@ -340,10 +340,4 @@ Jobの編集画面などは Ark のフォームクラスを学習した後実装
 本日は MVC パターンと、Ark におけるそれらの具体的な役割について学習しました。
 明日はコントローラとURLのマッピングについての詳細について学びます。
 
-今日のコードは Jobeet の git リポジトリから入手できます。 day-05 タグをチェックアウトしてください:
-
-    $ git clone git://github.com/typester/ark-jobeet.git
-    $ cd ark-jobeet
-    $ git checkout day-05
-
 
