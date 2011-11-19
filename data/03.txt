@@ -116,12 +116,18 @@ Jobeet のための `Jobeet::Schema` を作成しましょう。
     use strict;
     use warnings;
     use parent 'DBIx::Class::Schema';
+    use DateTime;
     
     __PACKAGE__->load_namespaces;
     
+    my $TZ = DateTime::TimeZone->new(name => 'Asia/Tokyo');
+    sub TZ    {$TZ}
+    sub now   {DateTime->now(time_zone => shift->TZ)}
+    sub today {shift->now->truncate(to => 'day')}
+    
     1;
 
-明日、ここにバージョニングサポートのコードを付け加えますが、とりあえずこのまま話を進めましょう。
+日付処理用のメソッドも幾つか作成しておきます。明日、ここにバージョニングサポートのコードを付け加えますが、とりあえずこのまま話を進めましょう。
 
 Schema クラスで `load_namespaces` を呼ぶと `DBIx::Class` は
 
@@ -269,17 +275,17 @@ Perl のクラスのファイル名はほとんどの場合パッケージ名か
         expires_at => {
             data_type   => 'DATETIME',
             is_nullable => 0,
-            timezone    => 'Asia/Tokyo',
+            timezone    => Jobeet::Schema->TZ,
         },
         created_at => {
             data_type   => 'DATETIME',
             is_nullable => 0,
-            timezone    => 'Asia/Tokyo',
+            timezone    => Jobeet::Schema->TZ,
         },
         updated_at => {
             data_type   => 'DATETIME',
             is_nullable => 0,
-            timezone    => 'Asia/Tokyo',
+            timezone    => Jobeet::Schema->TZ,
         },
     );
 
@@ -359,17 +365,17 @@ Perl のクラスのファイル名はほとんどの場合パッケージ名か
         expires_at => {
             data_type   => 'DATETIME',
             is_nullable => 0,
-            timezone    => 'Asia/Tokyo',
+            timezone    => Jobeet::Schema->TZ,
         },
         created_at => {
             data_type   => 'DATETIME',
             is_nullable => 0,
-            timezone    => 'Asia/Tokyo',
+            timezone    => Jobeet::Schema->TZ,
         },
         updated_at => {
             data_type   => 'DATETIME',
             is_nullable => 0,
-            timezone    => 'Asia/Tokyo',
+            timezone    => Jobeet::Schema->TZ,
         },
     );
     
@@ -479,7 +485,7 @@ Affiliate クラス:
         created_at => {
             data_type   => 'DATETIME',
             is_nullable => 0,
-            timezone    => 'Asia/Tokyo',
+            timezone    => Jobeet::Schema->TZ,
         },
     );
     
@@ -491,7 +497,7 @@ Affiliate クラス:
 これですべてのテーブルのカラム定義が完了しました。慣れていないと面倒に感じるかもしれません。
 これらの定義方法は `DBIx::Class::ResultSource` のドキュメントにまとめられていますので、慣れないうちはそれを見ながら定義すると良いでしょう。
 
-また、使用頻度の高い定義に関しては、定数関数用のモジュールを作ってそれを読み込んで使っても良いかもしれません。
+また、使用頻度の高い定義に関しては、定数関数用のモジュールを作ってそれを読み込んで使っても良いでしょう。
 
 
     package Jobeet::Schema::Types;
@@ -506,6 +512,7 @@ Affiliate クラス:
             extra => {
                 unsigned => 1,
             },
+            @_,
         };
     }
     
@@ -516,6 +523,7 @@ Affiliate クラス:
             extra => {
                 unsigned => 1,
             },
+            @_,
         };
     }
     
@@ -527,6 +535,7 @@ Affiliate クラス:
             extra => {
                 unsigned => 1,
             },
+            @_,
         };
     }
     
@@ -535,6 +544,7 @@ Affiliate クラス:
             data_type   => 'VARCHAR',
             size        => 255,
             is_nullable => 0,
+            @_,
         },
     }
     
@@ -542,7 +552,8 @@ Affiliate クラス:
         +{
             data_type   => 'DATETIME',
             is_nullable => 0,
-            timezone    => 'Asia/Tokyo',
+            timezone    => Jobeet::Schema->TZ,
+            @_,
         };
     }
     1;
@@ -559,7 +570,9 @@ Affiliate クラス:
         id          => PK_INTEGER,
         url         => VARCHAR,
         email       => VARCHAR,
-        token       => VARCHAR,
+        token       => VARCHAR(
+            size => 80,
+        ),
         is_active   => TINYINT,
         created_at  => DATETIME,
     );
@@ -569,7 +582,7 @@ Affiliate クラス:
     
     1;
 
-こんな風にすっきり書くことができます。誰か試してみてください。
+こんな風にすっきり書くことができます。
 
 
 さて、カラム定義は完了しましたが足りない物があります。そうです、リレーションの定義です。最初のリレーションモデルの図を思い出してください。
@@ -672,7 +685,7 @@ Result クラスのベースクラス（`Jobeet::Schema::ResultBase`）にその
     sub insert {
         my $self = shift;
     
-        my $now = models('Schema')->now;
+        my $now = Jobeet::Schema->now;
         $self->created_at( $now ) if $self->can('created_at');
         $self->updated_at( $now ) if $self->can('updated_at');
     
@@ -683,7 +696,7 @@ Result クラスのベースクラス（`Jobeet::Schema::ResultBase`）にその
         my $self = shift;
     
         if ($self->can('updated_at')) {
-            $self->updated_at( models('Schema')->now );
+            $self->updated_at( Jobeet::Schema->now );
         }
     
         $self->next::method(@_);
@@ -692,12 +705,6 @@ Result クラスのベースクラス（`Jobeet::Schema::ResultBase`）にその
 `insert` と `update` という関数を定義しました。これらはそれぞれ INSERT と UPDATE の SQL が実行されるときに呼ばれるメソッドです。`DBIx::Class` ではこのようにいろいろなところに自分のコードを差し込むことが出来ます。
 
 INSERT 時には `created_at` と `update_at` を更新し、UPDATE 時には `updated_at` のみを更新しているのがわかりますか？ またすべてのテーブルがこれらのカラムをもっているわけではないので、`can` を使用してメソッドの存在をチェックしています。
-
-また、この追加した関数の中で DateTime クラスを使用していますので、ResultBase クラスの最初のあたりに、
-
-    use DateTime;
-
-と言う行を追加する必要もあります。
 
 お疲れ様でした、以上でデータベース定義はすべて終わりです。
 
