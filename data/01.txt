@@ -79,11 +79,12 @@ SQLite もしくは MySQL が使える環境であることを確認してくだ
     $ ~/perl5/perlbrew/bin/perlbrew init
     $ echo 'source ~/perl5/perlbrew/etc/bashrc' >> ~/.bashrc
     $ source ~/.bashrc
-    $ perlbrew install perl-5.12.4
-    $ perlbrew switch perl-5.12.4
-    $ curl -L http://cpanmin.us | perl - --self-upgrade
+    $ perlbrew install perl-5.14.2 --as 5.14.2
+    $ perlbrew switch 5.14.2
+    $ perlbrew install-cpanm
+    $ cpanm --self-upgrade
 
-これで、Perl5.12.4の開発環境が整いました。cpanmというコマンドも使えるようになっていると思います。
+これで、Perl5.14.2の開発環境が整いました。cpanmというコマンドも使えるようになっていると思います。
 
 詳しくは tokuhirom 氏による以下のエントリーをがよくまとまっているのでそちらを参照してください。
 
