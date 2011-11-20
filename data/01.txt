@@ -165,7 +165,7 @@ Module::Setupは標準でModule::Setup::Flavor以下にFlavor(スケルトン)�
 
 ### module-setupのセットアップ
 
-    module-setup --init --flavor-class=Ark arkdbic
+    module-setup --init --flavor-class=Ark ark
 
 名前やメールアドレス、バージョン管理ツールについて聞かれると思いますが、適宜入力してください。
 これでArkでアプリケーションを作成する準備は完了です。
