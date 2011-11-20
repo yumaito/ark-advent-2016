@@ -115,7 +115,7 @@ Arkを使ったプロジェクトのテストには、CPAN上にある数多のT
 
 prove コマンドは Test::Harness モジュールがインストールされていれば、既にあなたのマシンに入っています。
 
-大抵の環境で、既にインストールされていると思いますが、インストールされていない場合は、[一日目](http://opensource.kayac.com/ja/projects/ark/advent/2009/01.html)に行ったように
+大抵の環境で、既にインストールされていると思いますが、インストールされていない場合は、[一日目](./01.html)に行ったように
 
     $ cpanm Test::Harness
 
@@ -206,14 +206,14 @@ Schema クラスのテストを書く
 
 次に、正しく作成される事が確認できた`$new_job`に対して、その他のテストをしていきます。
 
-[3日目](http://opensource.kayac.com/ja/projects/ark/advent/2009/03.html)で `Jobeet::Schema::ResultBase` に追加した、`created_at` や `updated_at` への日付の自動更新が、問題なく動作しているかのテストを追加しましょう。
+[3日目](./03.html)で `Jobeet::Schema::ResultBase` に追加した、`created_at` や `updated_at` への日付の自動更新が、問題なく動作しているかのテストを追加しましょう。
 
 
     isa_ok $new_job->created_at, 'DateTime';
 
     isa_ok $new_job->updated_at, 'DateTime';
 
-[7日目](http://opensource.kayac.com/ja/projects/ark/advent/2009/07.html)で `Jobeet::Schema::Result::Job` に追加した `expires_at`の日付の自動挿入も問題なく行われているかテストしましょう
+[7日目](./07.html)で `Jobeet::Schema::Result::Job` に追加した `expires_at`の日付の自動挿入も問題なく行われているかテストしましょう
 
     isa_ok $new_job->expires_at, 'DateTime';
 
@@ -272,7 +272,7 @@ Schema クラスのテストを書く
 
 続いて`Jobeet::Schema::Result::Category`のテストも行います。
 
-[8日目](http://opensource.kayac.com/ja/projects/ark/advent/2009/08.html)で`slug`カラムを追加し、更新される度に自動的に更新されるようにしたのを覚えているでしょうか？
+[8日目](./08.html)で`slug`カラムを追加し、更新される度に自動的に更新されるようにしたのを覚えているでしょうか？
 幸いなことに、作業をした日からそれほど時間が経っていないので覚えていると思います。しかし、これが半年後だったらどうでしょうか？自信を持ってどのように自動更新されるかを説明できるでしょうか？
 あなたがアインシュタインもビックリの天才なら即答する事も可能かもしれませんが、大半の人はそうでないと思います。
 

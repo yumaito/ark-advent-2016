@@ -261,7 +261,7 @@ stash とはグローバルな変数の入れ物であり、コントローラ�
             <div class="content">
               <span class="symfony">
                 <img src="/images/jobeet-mini.png" />
-                powered by <a href="http://opensource.kayac.com/projects/ark/">Ark</a>
+                powered by Ark
               </span>
               <ul>
                 <li><a href="">About Jobeet</a></li>

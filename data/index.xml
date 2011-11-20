@@ -5,7 +5,7 @@
      xmlns:content="http://purl.org/rss/1.0/modules/content/"
      xml:lang="ja">
   <channel>
-    <title>Ark Advent Calendar 2009</title>
+    <title>Ark Advent Calendar 2011</title>
     <link>http://opensource.kayac.com/ja/projects/ark/advent/2009/</link>
     <description>Jobeet tutorial - Ark edition</description>
 ? my @entries = sort { $b->filename cmp $a->filename } @{ $page->entries || [] };
@@ -16,6 +16,7 @@
       <link>http://opensource.kayac.com/ja/projects/ark/advent/2009/<?= $entry->filename ?>.html</link>
       <description><![CDATA[<?= encoded_string $entry->body ?>]]></description>
       <dc:creator>typester</dc:creator>
+      <dc:creator>Songmu</dc:creator>
       <pubDate><?= DateTime::Format::HTTP->format_datetime($entry->datetime) ?></pubDate>
     </item>
 ? }
