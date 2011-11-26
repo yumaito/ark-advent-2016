@@ -34,7 +34,7 @@ MVC パターンをはじめたばかりの初心者によくある間違いと�
 とりあえずテンプレートに対応する View を作成してみましょう。Ark ではデフォルトでいくつかのテンプレートエンジンに対応していますが、このチュートリアルでは Text::Microtemplate のビューを使用します。
 以下のコマンドを実行してください。
 
-    $ ark.pl view MT View::MT
+    $ script/dev/skeleton.pl view MT
 
 これで Ark::View::MT を継承した Jobeet::View::MT クラスが自動的に作成されます。
 
@@ -42,7 +42,7 @@ MVC パターンをはじめたばかりの初心者によくある間違いと�
 
     $c->forward( $c->view('MT') );
 
-としてこの作成したビューに処理を配送することでテンプレートのレンダリングが行われます。Jobeet::Controller::Root に以下の定義を付け加えてください。
+としてこの作成したビューに処理を配送することでテンプレートのレンダリングが行われます。Jobeet::Controller に以下の定義を付け加えてください。
 
     sub end :Private {
         my ($self, $c) = @_;
@@ -261,7 +261,7 @@ stash とはグローバルな変数の入れ物であり、コントローラ�
             <div class="content">
               <span class="symfony">
                 <img src="/images/jobeet-mini.png" />
-                powered by <a href="http://opensource.kayac.com/projects/ark/">Ark</a>
+                powered by Ark
               </span>
               <ul>
                 <li><a href="">About Jobeet</a></li>
@@ -324,9 +324,9 @@ content ブロックの中では先ほどコントローラからわたされた
 
 ここまででジョブの一覧ページはうまく動くはずです。以下のコマンドで開発サーバーを立ち上げて見てください。
 
-    $ ark.pl server -d
+    $ plackup -r dev.psgi
 
-そしてブラウザーで `http://127.0.0.1:4423/job/` にアクセスしてみてください。
+そしてブラウザーで `http://127.0.0.1:5000/job/` にアクセスしてみてください。
 
 ![homepage](http://www.symfony-project.org/images/jobeet/1_2/04/homepage.png)
 
@@ -339,11 +339,5 @@ Jobの編集画面などは Ark のフォームクラスを学習した後実装
 
 本日は MVC パターンと、Ark におけるそれらの具体的な役割について学習しました。
 明日はコントローラとURLのマッピングについての詳細について学びます。
-
-今日のコードは Jobeet の git リポジトリから入手できます。 day-05 タグをチェックアウトしてください:
-
-    $ git clone git://github.com/typester/ark-jobeet.git
-    $ cd ark-jobeet
-    $ git checkout day-05
 
 

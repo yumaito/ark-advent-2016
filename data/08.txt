@@ -7,36 +7,6 @@
 準備はいいですか？ 実現可能な実装について語りましょう。
 
 
-Ark のバージョンアップ
--------------------
-
-1日目から本文章を書いている間に、Ark の依存モジュールである Mouse の新バージョン（0.43）がリリースされました。
-すでに1日目の内容は更新していますが、もしあなたが1日目に Ark 0.11 を入れている場合 Ark のバージョンアップをする必要があります。（申し訳ありません！）
-
-1日目と同じ手順で Ark をインストールすることでバージョンアップが出来ます。
-
-    $ wget http://cloud.github.com/downloads/typester/ark-perl/Ark-0.12.tar.gz
-    $ tar -zxvf Ark-0.12.tar.gz
-    $ cd Ark-0.12
-    $ perl Makefile.PL
-    $ sudo -H make installdeps
-    $ make test
-    $ sudo make install
-
-簡単にまとめるとこのようになります。
-
-現在入っているバージョンを確認するためには、
-
-    $ perl -MArk\ 9999
-
-というようなコマンドを実行してみてください。
-
-    $ perl -MArk\ 9999
-    Ark version 9999 required--this is only version 0.12.
-    BEGIN failed--compilation aborted.
-
-このように 0.12 が入っていることがわかります。ここで、0.11（もしくはそれより低いバージョン）が表示される場合、上記を参考にしてまず Ark をバージョンアップしてください。
-
 依存モジュール
 ------------
 
@@ -85,11 +55,11 @@ slug カラムの追加
 
 カラムを更新したので新しい DDL ファイルを作成しましょう。
 
-    $ perl ./script/create_ddl.pl
+    $ perl ./script/dev/create_ddl.pl
 
 そしてここでデータベースもアップグレードと行きたいところですが、以下のコマンドを実行すると
 
-    $ perl ./script/upgrade_database.pl
+    $ perl ./script/dev/upgrade_database.pl
     ...
     DBIx::Class::Schema::Versioned::upgrade(): DBI Exception: DBD::SQLite::db do failed: Cannot add a NOT NULL column with default value NULL [for Statement "ALTER TABLE jobeet_category ADD COLUMN slug VARCHAR(255) NOT NULL"]
 
@@ -110,7 +80,7 @@ Jobeet::Schema::Result::Category にさらに次のメソッドを追加しま�
     sub update {
         my $self = shift;
     
-        if ($self->is_changed('name')) {
+        if ($self->is_column_changed('name')) {
             $self->slug( decamelize $self->name );
         }
     
@@ -128,8 +98,8 @@ INSERT 時には常に name から slug を作成し、UPDATE 時には name が
 そして以下の手順でデータベースを更新しましょう。
 
     $ rm database.db
-    $ perl ./script/upgrade_database.pl
-    $ perl ./script/insert_default_data.pl
+    $ perl ./script/dev/upgrade_database.pl
+    $ perl ./script/dev/insert_default_data.pl
 
 これで slug つきのデフォルトデータが作成されました。
 
@@ -171,7 +141,7 @@ INSERT 時には常に name から slug を作成し、UPDATE 時には name が
         my $attr = shift || {};
     
         $self->jobs(
-            { expires_at => { '>=', DateTime->now } },
+            { expires_at => { '>=', models('Schema')->now } },
             {   order_by => { -desc => 'created_at' },
                 defined $attr->{rows} ? (rows => $attr->{rows}) : (),
             }
@@ -295,7 +265,7 @@ job/index.mt、category/show.mt はどちらも jobs.css を参照していま�
 content ブロックの table の中身も二つのテンプレートで同じものが含まれていることに気がつくでしょう。
 テンプレートの一部を再利用する必要があるとき、パーシャルテンプレートを作る必要があります。パーシャルは複数のテンプレートの間で共有できるテンプレートのスニペットです。
 
-root/job/partial_jobs.mt として以下のようなテンプレートを作りましょう：
+root/job/_partial_jobs.mt として以下のようなテンプレートを作りましょう：
 
     ? my @jobs = @_;
     <table class="jobs">
@@ -317,7 +287,7 @@ root/job/partial_jobs.mt として以下のようなテンプレートを作り�
 
 そして `include` ヘルパーを利用することでパーシャルテンプレートをインクルードできます：
 
-    <?= include('job/partial_jobs', @jobs) ?>
+    <?= include('job/_partial_jobs', @jobs) ?>
 
 第二引数目以降はテンプレートに渡す引数そのままになります。
 
@@ -325,11 +295,11 @@ root/job/partial_jobs.mt として以下のようなテンプレートを作り�
 
 root/job/index.mt:
 
-    ?= include('job/partial_jobs', $category->get_active_jobs({ rows => $max_rows }));
+    ?= include('job/_partial_jobs', $category->get_active_jobs({ rows => $max_rows }));
 
 root/category/show.mt:
 
-    ?= include('job/partial_jobs', $category->get_active_jobs);
+    ?= include('job/_partial_jobs', $category->get_active_jobs);
 
 
 リストのパジネーション
@@ -355,7 +325,7 @@ DBIx::Class でページオブジェクトを扱うには、`search` メソッ�
         my $attr = shift || {};
     
         $self->jobs(
-            { expires_at => { '>=', DateTime->now } },
+            { expires_at => { '>=', models('Schema')->now } },
             {   order_by => { -desc => 'created_at' },
                 defined $attr->{rows} ? (rows => $attr->{rows}) : (),
                 defined $attr->{page} ? (page => $attr->{page}) : (),

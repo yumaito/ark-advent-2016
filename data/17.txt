@@ -11,6 +11,11 @@ Jobeet のフィード追加に関して、求職者はリアルタイムで新�
 
 "ストーリー F7: アフィリエイトは現在アクティブな求人リストを読み取る"
 
+新たなモジュール
+----------------
+
+今回は、JSON::Anyが新たに必要になります。cpanmで入れておきましょう。Makefile.PLへの追記も忘れずに。
+
 
 フィクスチャ
 -----------
@@ -61,8 +66,8 @@ Jobeet のフィード追加に関して、求職者はリアルタイムで新�
 デフォルトデータを作り直しておきましょう：
 
     $ rm database.db
-    $ perl ./script/upgrade_database.pl
-    $ perl ./script/insert_default_data.pl
+    $ perl ./script/dev/upgrade_database.pl
+    $ perl ./script/dev/insert_default_data.pl
 
 
 求人情報のWebサービス
@@ -186,6 +191,9 @@ Webサービスをテストを書いておきましょう：
     
     done_testing;
     
+
+テストを書いたらちゃんと動かしておきましょう。
+
 
 また明日
 -------

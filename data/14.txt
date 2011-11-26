@@ -236,7 +236,7 @@ Categoryコントローラのテスト
 
 とういうようになります。順番にやっていきましょう。コントローラのテストには `t/controller` と言うディレクトリを使うようにしましょう。
 
-まずひな形を作ります、`t/controller/category.t` を以下のように編集してください：
+まずひな形を作ります、`t/06_controller_category.t` を以下のように編集してください：
 
     use strict;
     use warnings;
@@ -314,25 +314,24 @@ pageクエリの値が反映されているかをチェックします
 
 Category コントローラのテストはこれで一通り書き終えました。実行してみましょう：
 
-<pre><code>$ prove -lv t/controller/category.t
-t/controller/category.t .. 
-ok 1 - action called ok
-ok 2 - 404 status ok
-ok 3 - category not set
-ok 4 - jobs not set
-ok 5 - action called ok
-ok 6 - 200 status ok
-ok 7 - The object isa Jobeet::Schema::Result::Category
-ok 8 - The object isa Jobeet::Schema::ResultSet::Job
-ok 9 - slug ok
-ok 10 - current page 1 ok
-ok 11 - current page 2 ok
-1..11
-ok
-<span class="string">All tests successful.</span>
-Files=1, Tests=11,  2 wallclock secs ( 0.03 usr  0.00 sys +  0.90 cusr  0.12 csys =  1.05 CPU)
-Result: PASS
-</code></pre>
+    $ prove -lv t/controller/category.t
+    t/controller/category.t .. 
+    ok 1 - action called ok
+    ok 2 - 404 status ok
+    ok 3 - category not set
+    ok 4 - jobs not set
+    ok 5 - action called ok
+    ok 6 - 200 status ok
+    ok 7 - The object isa Jobeet::Schema::Result::Category
+    ok 8 - The object isa Jobeet::Schema::ResultSet::Job
+    ok 9 - slug ok
+    ok 10 - current page 1 ok
+    ok 11 - current page 2 ok
+    1..11
+    ok
+    All tests successful.
+    Files=1, Tests=11,  2 wallclock secs ( 0.03 usr  0.00 sys +  0.90 cusr  0.12 csys =  1.05 CPU)
+    Result: PASS
 
 緑の All tests successful. の文字が誇らしいです。
 

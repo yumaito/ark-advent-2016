@@ -12,19 +12,73 @@ Ark 自体にはデータベースにアクセスする機能はありません�
 依存モジュール
 ------------
 
-さて昨日までのチュートリアルを正確におこなっていれば、`DBIx::Class` は既にインストールされていることでしょう。しかし本日はもう一つ、SQL::Translator というモジュールが必要なので CPAN の復習もかねて最初にこのモジュールをインストールしておきましょう。
+`DBIx::Class` の他に、本日はもう一つ、`SQL::Translator` というモジュールが必要なので CPAN の復習もかねて最初にこれらのモジュールをインストールしておきましょう。
 
-    $ sudo -H cpan
+    $ cpanm DBIx::Class SQL::Translator
 
-として cpan シェルを起動し
+さて、今、あなたのアプリケーションで使う2つのCPANモジュールを新たにインストールしました。こういう時は、
+Makefile.PL に依存モジュールの記述を以下のように追加しておきましょう。
 
-    cpan> install SQL::Translator
+    requires 'DBIx::Class';
+    requires 'SQL::Translator';
 
-とするのでしたね。念のために
+いちいち記載するのが手間に感じるかもしれませんが、これは後々あなたを大いに助けることになります。
 
-    cpan> install DBIx::Class
+別の環境(それは本番環境かもしれません!)にアプリケーションをセットアップする際にまたCPANモジュールを全て入れる必要があります。
+CPANモジュールのインストール漏れがあったら大変です。
 
-として最新版の `DBIx::Class` が入っているか確認するのも良いでしょう。
+しかし、心配することはありません。Makefile.PL にきちんと依存モジュールを記載しておけば、以下のコマンド一発で魔法のように
+全てのCPANモジュールをインストールしてくれます。
+
+    $ cpanm --installdeps .
+
+
+Why DBIx::Class ?
+-----------------
+
+えっ、`DBIx::Class`？と思われるかもしれません。かつては一斉を風靡したDBIx::Classですが、日本のPerl界隈ではDBIx::Classはあまり好ましいモジュールでは
+なくなってきています。
+
+曰く、
+
+- オブジェクトを大量に生成するため重い
+- クエリ発行のタイミングがわかりづらい
+- 余計な挙動をする
+- ソースコードが大きすぎて読めない
+- 上記を避けるためのバッドノウハウも覚えなくてはいけない
+
+等々。全て正しいです。
+
+しかし、以下のメリットがそれらを上回ります。
+
+- 枯れている
+- 多くの便利なプラグインが存在する
+- 世界中で使われており、バグレポートや修正要望が積極的に寄せられている
+- 今もなお、優秀な複数のメンテナがメンテナンスを続けている
+
+プラグインという点では特に DBIx::Class::Schema::Versioned が便利です。これはスキーマを随時変更しながら
+長期運用をすることを考えると、欠かせないモジュールとなっています。
+(これがあるから離れられないという噂もあります)
+
+他にもORMの選択肢はありますが、1日目の Ark の説明でも述べたとおり、軽量かつあまり枯れて
+いないモジュールを使う場合は、必要に応じて自分でソースを読み、足りない機能があったら
+モジュールやプラグインを自分で書いたりすることが求められてしまいます。
+
+それに、今後ORMを乗り換えたとしても(遠くない将来そうなるでしょう)、DBIx::Classの流儀を
+知っておくことは損ではありません。
+
+DBIx::Class は本当に何でもできます。余計に思える機能もたくさんあります。  
+「こんなこともできてしまうのか」と驚かされることもあります。  
+多機能という点ではピークとも言えるでしょう。
+それは今後、新しいORMが作られる中でも使っていく上でも、ベンチマークとなることは間違いありません。
+
+2011年現在、DBIx::Classの有力な代替候補はDBIx::Skinnyですが、元々は
+DBIx::Classのヘビーユーザーだった作者がDBIx::Classに嫌気がさして作り始めた背景があるようです。
+良くも悪くも DBIx::Class を受け継いでいる部分があります。
+
+また、DBIx::Skinny の後継として、Teng というORMの開発が進んでいるので、今にDBIx::Class から
+DBIx::Skinny に乗り換えるよりかは、もう少し様子を見てTengに乗り換えてるのも良いのではないでしょうか。
+
 
 リレーションモデル
 ---------------
@@ -61,13 +115,19 @@ Jobeet のための `Jobeet::Schema` を作成しましょう。
     package Jobeet::Schema;
     use strict;
     use warnings;
-    use base 'DBIx::Class::Schema';
+    use parent 'DBIx::Class::Schema';
+    use DateTime;
     
     __PACKAGE__->load_namespaces;
     
+    my $TZ = DateTime::TimeZone->new(name => 'Asia/Tokyo');
+    sub TZ    {$TZ}
+    sub now   {DateTime->now(time_zone => shift->TZ)}
+    sub today {shift->now->truncate(to => 'day')}
+    
     1;
 
-明日、ここにバージョニングサポートのコードを付け加えますが、とりあえずこのまま話を進めましょう。
+日付処理用のメソッドも幾つか作成しておきます。明日、ここにバージョニングサポートのコードを付け加えますが、とりあえずこのまま話を進めましょう。
 
 Schema クラスで `load_namespaces` を呼ぶと `DBIx::Class` は
 
@@ -99,7 +159,7 @@ Perl のクラスのファイル名はほとんどの場合パッケージ名か
     package Jobeet::Schema::Result::Job;
     use strict;
     use warnings;
-    use base 'DBIx::Class';
+    use parent 'DBIx::Class';
     
     __PACKAGE__->load_components(qw/Core/);
     
@@ -113,7 +173,7 @@ Perl のクラスのファイル名はほとんどの場合パッケージ名か
     package Jobeet::Schema::Result::Job;
     use strict;
     use warnings;
-    use base 'DBIx::Class';
+    use parent 'DBIx::Class';
     
     __PACKAGE__->load_components(qw/InflateColumn::DateTime Core/);
     
@@ -128,7 +188,7 @@ Perl のクラスのファイル名はほとんどの場合パッケージ名か
     package Jobeet::Schema::ResultBase;
     use strict;
     use warnings;
-    use base 'DBIx::Class';
+    use parent 'DBIx::Class';
     
     __PACKAGE__->load_components(qw/InflateColumn::DateTime Core/);
     
@@ -139,7 +199,7 @@ Perl のクラスのファイル名はほとんどの場合パッケージ名か
     package Jobeet::Schema::Result::Job;
     use strict;
     use warnings;
-    use base 'Jobeet::Schema::ResultBase';
+    use parent 'Jobeet::Schema::ResultBase';
     
     # ここにテーブル定義
     
@@ -215,17 +275,17 @@ Perl のクラスのファイル名はほとんどの場合パッケージ名か
         expires_at => {
             data_type   => 'DATETIME',
             is_nullable => 0,
-            timezone    => 'Asia/Tokyo',
+            timezone    => Jobeet::Schema->TZ,
         },
         created_at => {
             data_type   => 'DATETIME',
             is_nullable => 0,
-            timezone    => 'Asia/Tokyo',
+            timezone    => Jobeet::Schema->TZ,
         },
         updated_at => {
             data_type   => 'DATETIME',
             is_nullable => 0,
-            timezone    => 'Asia/Tokyo',
+            timezone    => Jobeet::Schema->TZ,
         },
     );
 
@@ -239,7 +299,7 @@ Perl のクラスのファイル名はほとんどの場合パッケージ名か
     package Jobeet::Schema::Result::Job;
     use strict;
     use warnings;
-    use base 'Jobeet::Schema::ResultBase';
+    use parent 'Jobeet::Schema::ResultBase';
     
     __PACKAGE__->table('jobeet_job');
     
@@ -305,17 +365,17 @@ Perl のクラスのファイル名はほとんどの場合パッケージ名か
         expires_at => {
             data_type   => 'DATETIME',
             is_nullable => 0,
-            timezone    => 'Asia/Tokyo',
+            timezone    => Jobeet::Schema->TZ,
         },
         created_at => {
             data_type   => 'DATETIME',
             is_nullable => 0,
-            timezone    => 'Asia/Tokyo',
+            timezone    => Jobeet::Schema->TZ,
         },
         updated_at => {
             data_type   => 'DATETIME',
             is_nullable => 0,
-            timezone    => 'Asia/Tokyo',
+            timezone    => Jobeet::Schema->TZ,
         },
     );
     
@@ -329,7 +389,7 @@ Perl のクラスのファイル名はほとんどの場合パッケージ名か
     package Jobeet::Schema::Result::Category;
     use strict;
     use warnings;
-    use base 'Jobeet::Schema::ResultBase';
+    use parent 'Jobeet::Schema::ResultBase';
     
     __PACKAGE__->table('jobeet_category');
     
@@ -359,7 +419,7 @@ CategoryAffiliate クラス：
     package Jobeet::Schema::Result::CategoryAffiliate;
     use strict;
     use warnings;
-    use base 'Jobeet::Schema::ResultBase';
+    use parent 'Jobeet::Schema::ResultBase';
     
     __PACKAGE__->table('jobeet_category_affiliate');
     
@@ -389,7 +449,7 @@ Affiliate クラス:
     package Jobeet::Schema::Result::Affiliate;
     use strict;
     use warnings;
-    use base 'Jobeet::Schema::ResultBase';
+    use parent 'Jobeet::Schema::ResultBase';
     
     __PACKAGE__->table('jobeet_affiliate');
     
@@ -425,7 +485,7 @@ Affiliate クラス:
         created_at => {
             data_type   => 'DATETIME',
             is_nullable => 0,
-            timezone    => 'Asia/Tokyo',
+            timezone    => Jobeet::Schema->TZ,
         },
     );
     
@@ -436,6 +496,94 @@ Affiliate クラス:
 
 これですべてのテーブルのカラム定義が完了しました。慣れていないと面倒に感じるかもしれません。
 これらの定義方法は `DBIx::Class::ResultSource` のドキュメントにまとめられていますので、慣れないうちはそれを見ながら定義すると良いでしょう。
+
+また、使用頻度の高い定義に関しては、定数関数用のモジュールを作ってそれを読み込んで使っても良いでしょう。
+
+
+    package Jobeet::Schema::Types;
+    use parent 'Exporter';
+    our @EXPORT qw/PK_INTEGER INTEGER VARCHAR TINYINT DATETIME/;
+    
+    sub PK_INTEGER {
+        +{
+            data_type         => 'INTEGER',
+            is_nullable       => 0,
+            is_auto_increment => 1,
+            extra => {
+                unsigned => 1,
+            },
+            @_,
+        };
+    }
+    
+    sub INTEGER {
+        +{
+            data_type         => 'INTEGER',
+            is_nullable       => 0,
+            extra => {
+                unsigned => 1,
+            },
+            @_,
+        };
+    }
+    
+    sub TINYINT {
+        +{
+            data_type         => 'TINYINT',
+            is_nullable       => 0,
+            default_value     => 0,
+            extra => {
+                unsigned => 1,
+            },
+            @_,
+        };
+    }
+    
+    sub VARCHAR {
+        +{
+            data_type   => 'VARCHAR',
+            size        => 255,
+            is_nullable => 0,
+            @_,
+        },
+    }
+    
+    sub DATETIME {
+        +{
+            data_type   => 'DATETIME',
+            is_nullable => 0,
+            timezone    => Jobeet::Schema->TZ,
+            @_,
+        };
+    }
+    1;
+
+    package Jobeet::Schema::Result::Affiliate;
+    use strict;
+    use warnings;
+    use parent 'Jobeet::Schema::ResultBase';
+    use Jobeet::Schema::Types;
+    
+    __PACKAGE__->table('jobeet_affiliate');
+    
+    __PACKAGE__->add_columns(
+        id          => PK_INTEGER,
+        url         => VARCHAR,
+        email       => VARCHAR,
+        token       => VARCHAR(
+            size => 80,
+        ),
+        is_active   => TINYINT,
+        created_at  => DATETIME,
+    );
+    
+    __PACKAGE__->set_primary_key('id');
+    __PACKAGE__->add_unique_constraint(['email']);
+    
+    1;
+
+こんな風にすっきり書くことができます。
+
 
 さて、カラム定義は完了しましたが足りない物があります。そうです、リレーションの定義です。最初のリレーションモデルの図を思い出してください。
 
@@ -479,6 +627,54 @@ Affiliate:
 
     __PACKAGE__->many_to_many( categories => category_affiliate => 'category' );
 
+
+### リレーションに関する注意点
+
+各リレーションメソッドは、第4引数にハッシュリファレンスを渡すことで細かい設定を追加することが可能です。
+
+#### is_foreign_key_constraint
+
+リレーションを正しく定義すると、出力される DDL にも適宜外部キー制約等を付加してくれます。
+
+これは非常に優れものなのですが、困ったことに、MySQLは **外部キーが作成されるときに、参照元の列でインデックスを自動的に生成**
+してしまいます。
+
+御存知の通り、過剰なインデックスはINSERT処理等を重くする原因となるので、場合によっては、
+外部キー制約を DB に定義したくない場合があるでしょう。
+
+また、単体テストを書くときに、外部キー制約が枷になって、テストケース毎に膨大で煩雑なフィクスチャが必要になってしまう
+ことを避けたい場合も外部キー制約を DB に定義したくない場合があるでしょう。
+
+そういった場合は、リレーションメソッドの第3引数に、 `is_foreign_key_constraint => 0` を指定してみてください。
+DDL には外部キー制約が付加されませんが、ORM上では正しくメソッドをたどることができます。
+
+
+#### cascade_delete
+
+恐ろしいことに `has_many` リレーションメソッドはデフォルトでは、レコードの削除及び更新をcascade（連鎖）します。
+
+データの整合性を保つという点では、望ましい挙動なのかもしれませんが、一般的に DELETE 文は低速であり、簡単に
+アプリケーションのボトルネックとなり得ます。大規模なアプリケーションでそれが連鎖なんてしようものなら大変です。
+
+例えば、Userデータが削除されたら、それに紐付くリレーションが一斉に削除されるだなんて想像もしたくありません。
+
+この挙動を防ぐために、リレーションメソッドの第3引数に`cascade_delete => 0` を指定することができます。
+
+(もちろん DELETE 文がなるべく発行されないようなアプリケーションを作ることが肝要です。)
+
+上記のオプションをまとめて指定すると以下のようになります。
+
+Category:
+
+    __PACKAGE__->has_many(
+        category_affiliate => 'Jobeet::Schema::Result::CategoryAffiliate', 'category_id',
+        {
+            is_foreign_key_constraint   => 0,
+            cascade_delete              => 0,
+        },
+    );
+
+
 これでリレーションの定義も完了しました。
 リレーションに関しての詳細は `DBIx::Class::Relationship` のドキュメントが詳しいです。
 
@@ -489,7 +685,7 @@ Result クラスのベースクラス（`Jobeet::Schema::ResultBase`）にその
     sub insert {
         my $self = shift;
     
-        my $now = DateTime->now;
+        my $now = Jobeet::Schema->now;
         $self->created_at( $now ) if $self->can('created_at');
         $self->updated_at( $now ) if $self->can('updated_at');
     
@@ -500,7 +696,7 @@ Result クラスのベースクラス（`Jobeet::Schema::ResultBase`）にその
         my $self = shift;
     
         if ($self->can('updated_at')) {
-            $self->updated_at( DateTime->now );
+            $self->updated_at( Jobeet::Schema->now );
         }
     
         $self->next::method(@_);
@@ -510,13 +706,53 @@ Result クラスのベースクラス（`Jobeet::Schema::ResultBase`）にその
 
 INSERT 時には `created_at` と `update_at` を更新し、UPDATE 時には `updated_at` のみを更新しているのがわかりますか？ またすべてのテーブルがこれらのカラムをもっているわけではないので、`can` を使用してメソッドの存在をチェックしています。
 
-また、この追加した関数の中で DateTime クラスを使用していますので、ResultBase クラスの最初のあたりに、
-
-    use DateTime;
-
-と言う行を追加する必要もあります。
-
 お疲れ様でした、以上でデータベース定義はすべて終わりです。
+
+
+### InflateとDeflate
+
+上記のDATETIME型で使われていますが、DBIx::ClassにはInflateという仕組みがあります。
+DBのデータを、オブジェクトとして直接操作できるようにするというものです。
+
+例えば、DBのカラムにJSON文字列を入れて、それを直接データ構造として扱いたい場合は以下のようになります。  
+(DBのカラムにJSONを入れるのはどうなのかという話はおいておきます。)
+
+    use JSON qw/to_json from_json/;
+    ...
+    __PACKAGE__->inflate_column(
+        'json_column',
+        {
+            inflate => sub { my $p = shift; $p && from_json($p); },
+            deflate => sub { my $p = shift; $p && to_json($p); },
+        }
+    );
+
+同じようなInflate処理を何箇所も記述する必要がある場合は、ResultBaseに共通メソッドを定義しておくと良いでしょう。
+
+    package Jobeet::Schema::ResultBase;
+    ...
+    
+    use JSON qw/to_json from_json/;
+    
+    sub inflate_json_column {
+        my $pkg = shift;
+        my @columns = @_;
+
+        for my $column (@columns) {
+            $pkg->inflate_column(
+                $column,
+                {
+                    inflate => sub { my $p = shift; $p && from_json($p); },
+                    deflate => sub { my $p = shift; $p && to_json($p); },
+                }
+            );
+        }
+    }
+
+    package Jobeet::Schema::Result::Something
+    ...
+    __PACKAGE__->inflate_json_column(qw/json_colummn1 json_colummn2/);
+
 
 
 ORM からデータベースにアクセスする
@@ -684,8 +920,16 @@ Result クラスではそれを表す Row にたいしてさまざまな処理�
 
 などのようにデータを更新したり、データを削除したりも出来ます。
 
+
+まだまだ機能はたくさん
+--------------------
+
 ここで DBIx::Class のメソッドをすべて説明していたらいくら書いてもきりがありません。ここではこの辺にしておきましょう。
 まだ余力がある方は、ResultSetクラスに関しては `DBIx::Class::ResultSet` のドキュメントを、Result クラスに関しては `DBIx::Class::Row` のドキュメントがそれぞれ参考になるでしょう。
+
+また、以下の記事にDBIx::Classの使い方が単体でよくまとまっているので読んでおくと良いでしょう。
+
+[DBIx::Classでデータベース操作](http://gihyo.jp/dev/serial/01/perl-hackers-hub/000301)
 
 
 明日お会いしましょう

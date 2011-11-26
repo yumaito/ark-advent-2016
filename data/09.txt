@@ -206,7 +206,7 @@ Job コントローラからこのフォームクラスを使用します。
 
     sub create :Local :Form('Jobeet::Form::Job') {
         my ($self, $c) = @_;
-
+    
         $c->stash->{form} = $self->form;
     }
 
