@@ -6,14 +6,14 @@
      xml:lang="ja">
   <channel>
     <title>Ark Advent Calendar 2011</title>
-    <link>http://opensource.kayac.com/ja/projects/ark/advent/2009/</link>
+    <link>http://tech.kayac.com/ark-advent-calendar-2011/</link>
     <description>Jobeet tutorial - Ark edition</description>
 ? my @entries = sort { $b->filename cmp $a->filename } @{ $page->entries || [] };
 ? for my $entry (@entries) {
 ? my ($eid) = $entry->filename =~ /^(\d+)/;
     <item>
       <title><?= $eid ?>日目: <?= $entry->title ?></title>
-      <link>http://opensource.kayac.com/ja/projects/ark/advent/2009/<?= $entry->filename ?>.html</link>
+      <link>http://tech.kayac.com/ark-advent-calendar-2011/<?= $entry->filename ?>.html</link>
       <description><![CDATA[<?= encoded_string $entry->body ?>]]></description>
       <dc:creator>typester</dc:creator>
       <dc:creator>Songmu</dc:creator>
