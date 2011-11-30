@@ -9,6 +9,25 @@
 
 <meta name="viewport" content="width=320" />
 <link rel="alternate" type="application/rss+xml" href="index.xml" />
+<!--Analytics [-->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-481889-41']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+// Copyright 2007 Google, Inc.
+// This sample code is under the Apache2 license, see
+// http://www.apache.org/licenses/LICENSE-2.0 for license details.
+var TimeTracker=function(a){this.bucket_=a?a.sort(this.sortNumber):TimeTracker.DEFAULT_BUCKET};TimeTracker.DEFAULT_BUCKET=[100,500,1500,2500,5E3];TimeTracker.prototype._getTimeDiff=function(){return this.stopTime_-this.startTime_};TimeTracker.prototype.sortNumber=function(a,b){return a-b};TimeTracker.prototype._recordStartTime=function(a){this.startTime_=a!=undefined?a:(new Date).getTime()};TimeTracker.prototype._recordEndTime=function(a){this.stopTime_=a!=undefined?a:(new Date).getTime()}; TimeTracker.prototype._track=function(a,b,d){a=b!=undefined&&b.length!=0?a._createEventTracker(b):a._createEventTracker("TimeTracker");var c;for(b=0;b<this.bucket_.length;b++)if(this._getTimeDiff()<this.bucket_[b]){c=b==0?"0-"+this.bucket_[0]:this.bucket_[b-1]+"-"+(this.bucket_[b]-1);break}c||(c=this.bucket_[b-1]+"+");a._trackEvent(c,d,this._getTimeDiff())};TimeTracker.prototype._setHistogramBuckets=function(a){this.bucket_=a.sort(this.sortNumber)};
+var timeTracker = new TimeTracker();
+timeTracker._recordStartTime();
+$(window).load(function(){try{timeTracker._recordEndTime();timeTracker._setHistogramBuckets([25,50,100,500,1E3,2E3,3E3]);timeTracker._track(_gat._getTracker("UA-481889-41"))}catch(a){}});
+</script>
+<!--] Analytics-->
 </head>
 <body>
 <div id="container">
