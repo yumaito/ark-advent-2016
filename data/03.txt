@@ -502,7 +502,7 @@ Affiliate クラス:
 
     package Jobeet::Schema::Types;
     use parent 'Exporter';
-    our @EXPORT qw/PK_INTEGER INTEGER VARCHAR TINYINT DATETIME/;
+    our @EXPORT = qw/PK_INTEGER INTEGER VARCHAR TINYINT DATETIME/;
     
     sub PK_INTEGER {
         +{

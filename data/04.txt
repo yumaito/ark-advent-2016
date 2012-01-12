@@ -490,11 +490,3 @@ database.db という config.pl で指定したデータベースが作成され
 今日でデータベースを使用する準備は完全に整いました。
 明日は、Web フレームワークで最もよく使われるパラダイムの1つである MVC デザインパターンについて話します。
 
-今日のコードは Jobeet の git リポジトリから入手できます。 day-04 タグをチェックアウトしてください:
-
-    $ git clone git://github.com/typester/ark-jobeet.git
-    $ cd ark-jobeet
-    $ git checkout day-04
-
-
-
