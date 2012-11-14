@@ -113,6 +113,7 @@ Jobeet のための `Jobeet::Schema` を作成しましょう。
 `lib/Jobeet/Schema.pm` を作成し、以下のように編集してみましょう。
 
     package Jobeet::Schema;
+    use v5.16.0;
     use strict;
     use warnings;
     use parent 'DBIx::Class::Schema';
@@ -120,9 +121,8 @@ Jobeet のための `Jobeet::Schema` を作成しましょう。
     
     __PACKAGE__->load_namespaces;
     
-    my $TZ = DateTime::TimeZone->new(name => 'Asia/Tokyo');
-    sub TZ    {$TZ}
-    sub now   {DateTime->now(time_zone => shift->TZ)}
+    sub {state $TZ = DateTime::TimeZone->new(name => 'Asia/Tokyo')}
+    sub now   {DateTime->now(time_zone => shift->TZ, locale => 'ja')}
     sub today {shift->now->truncate(to => 'day')}
     
     1;
@@ -781,7 +781,7 @@ DBIx::Class は `DBIC_TRACE` と言う環境変数でどのような SQL が実�
 いちど今作成した test.db を削除し、この環境変数とともにもう一度スクリプトを走らせてみましょう。
 
     $ rm test.db
-    $ DBIC_TRACE=1 deploy.pl
+    $ DBIC_TRACE=1 perl deploy.pl
 
 うまくいっていればこのような出力がされるはずです：
 
@@ -881,7 +881,7 @@ SQLite以外のデータベース環境が利用できる人は先ほどのス�
 
     print $category_rs->count
 
-を実行してみましょう。1が帰りますね。
+を実行してみましょう。1が返りますね。
 
 ResultSet クラスは他にもテーブルに対するさまざまな処理をすることができます。
 
