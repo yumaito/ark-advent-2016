@@ -83,24 +83,16 @@ Arkのモデルについての詳細は明日学習します。詳しいこと�
 
 と言う名前で Ark のモデルを定義したことになります。
 
-ところで、Schemaを追加する度に、定義を追加するのは面倒です。以下のようにすれば、Schema/Result/ 以下のファイルを
-探して、登録してくれます。もちろんこの場合、Module::Findモジュールの追加が必要なので、cpanmでインストールする
-と同時に、Makefile.PLへの追記を忘れずにしておきましょう。
+ところで、Schemaを追加する度に、定義を追加するのは面倒です。以下のようにすれば、Schema/Result/ 以下のモジュールを自動的に登録してくれます。
 
-    {
-        my @tables = map {
-            my $module = $_;
-            (my $table = $module) =~ s/Jobeet::Schema::Result:://;
-            $table;
-        } Module::Find::findallmod('Jobeet::Schema::Result');
+    autoloader qr/^Schema::/ => sub {
+        my ($self, $name) = @_;
 
-        for my $table (@tables) {
-            register "Schema::${table}" => sub {
-                shift->get('Schema')->resultset($table);
-            };
+        my $schema = $self->get('Schema');
+        for my $t ($schema->sources) {
+            $self->register( "Schema::$t" => sub { $schema->resultset($t) });
         }
-    }
-
+    };
 
 また
 
@@ -143,7 +135,7 @@ Arkのモデルについての詳細は明日学習します。詳しいこと�
 
 お疲れさまでした。以上の作業で無事に Jobeet::Models は Jobeet アプリケーションのモデルクラスとして動作するようになります。
 
-今日は大変めんどくさいコードを書かせてしまいましたが、熟練した Ark プログラマーはこのようにアプリケーションを作成するたびに同じようなことを書くと言うことはしません。*TODO*
+今日は大変めんどくさいコードを書かせてしまいましたが、熟練した Ark プログラマーはこのようにアプリケーションを作成するたびに同じようなことを書くと言うことはしません。初日にも少し説明したように、自分好みのスケルトンを作り、それをベースにアプリ開発ができるようにあると一人前です。
 
 スキーマのバージョニング
 --------------------
