@@ -73,20 +73,21 @@ SQLite もしくは MySQL が使える環境であることを確認してくだ
 
 近年は、システム標準のPerlをそのまま使うのではなく、perlbrewとcpanmを組み合わせて、開発環境を構築するのが主流となっています。
 
+システムを壊すことなく、任意のPerlのバージョンを利用でき、一般ユーザー権限で手軽にPerlの実行環境を整えられるのが大きなメリットです。
+
 以下のコマンドを打てば、環境構築が可能です。シェルの種類やPerlのバージョン等はリリースにあわせて適宜書き換えてください。
 
-    $ curl -L http://xrl.us/perlbrew | perl - install
-    $ ~/perl5/perlbrew/bin/perlbrew init
-    $ echo 'source ~/perl5/perlbrew/etc/bashrc' >> ~/.bashrc
-    $ source ~/.bashrc
-    $ perlbrew install perl-5.14.2 --as 5.14.2
-    $ perlbrew switch 5.14.2
+    $ curl -kL http://install.perlbrew.pl | bash
+    $ perlbrew install perl-5.16.2 --as 5.16.2
+    $ perlbrew switch 5.16.2
     $ perlbrew install-cpanm
     $ cpanm --self-upgrade
 
-これで、Perl5.14.2の開発環境が整いました。cpanmというコマンドも使えるようになっていると思います。
+これで、Perl5.16.2の開発環境が整いました。cpanmというコマンドも使えるようになっているはずです。
 
-詳しくは tokuhirom 氏による以下のエントリーをがよくまとまっているのでそちらを参照してください。
+perlbrewによる環境構築方法は随時アップデートされています。最新の情報は[本家のサイト](http://perlbrew.pl/)を参照下さい。
+
+少し古い内容もありますが tokuhirom 氏による以下のエントリーをがよくまとまっているのでそちらも参照してください。
 
 [モダンな Perl  の開発環境の構築方法](http://d.hatena.ne.jp/tokuhirom/20100716/perlenv)
 
@@ -239,7 +240,7 @@ plackup の -E オプション(標準はdevelopment)により表示を変更で�
 -r オプションをつけておくと、 lib/ 以下や、.psgi 変更を検知してサーバーを再起動してくれます。開発中はつけておくと良いでしょう。
 
 ただし、以下のXSモジュールをいれておかないと、CPUをかなり消費してしまうので、インストールしておきましょう。  
-(Mac OS X Lion の場合逆効果という報告もあるので入れないほうが良いかもしれません)
+(Mac OS X Lion 以降の場合逆効果という報告もあるので入れないほうが良いかもしれません)
 
 linux の場合
 
