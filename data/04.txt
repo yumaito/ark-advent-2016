@@ -1,6 +1,6 @@
 データモデルその2
 
-昨日は DBIx::Class の基本について学習しました。まだ生き残っていますか？
+昨日は DBIx::Class の基本と GitDDL について学習しました。まだ生き残っていますか？
 
 今日は引き続きデータモデルについて学習します。
 
@@ -11,7 +11,7 @@
 
     use parent 'ClassName';
 
-は ClassName と言うクラスを継承すると言う意味です。詳しくは `perldoc parent` などを参照ください。  
+は ClassName と言うクラスを継承すると言う意味です。詳しくは `perldoc parent` などを参照ください。
 (baseというモジュールもありますが現在はparentを使うことが推奨されています。こちらも詳しくは `perldoc base` を参照ください。)
 
     __PACKAGE__
@@ -22,9 +22,9 @@
     use strict;
     use warnings;
     use parent 'DBIx::Class::Schema';
-    
+
     __PACKAGE__->load_namespaces;
-    
+
     1;
 
 と言うコードの `__PACKAGE__` は `Jobeet::Schema` を表します。ここで
@@ -53,24 +53,24 @@ Arkのモデルについての詳細は明日学習します。詳しいこと�
     use strict;
     use warnings;
     use Ark::Models '-base';
-    
+
     register Schema => sub {
         my $self = shift;
-    
+
         my $conf = $self->get('conf')->{database}
             or die 'require database config';
-    
+
         $self->ensure_class_loaded('Jobeet::Schema');
         Jobeet::Schema->connect(@$conf);
     };
-    
+
     for my $table (qw/Job Category CategoryAffiliate Affiliate/) {
         register "Schema::$table" => sub {
             my $self = shift;
             $self->get('Schema')->resultset($table);
         };
     }
-    
+
     1;
 
 今日のところは register という関数でモデルを登録するのだなということを覚えておいてください。このコードでは
@@ -103,7 +103,7 @@ Arkのモデルについての詳細は明日学習します。詳しいこと�
 新しく config.pl と言うファイルを作成し、以下のように書いてください：
 
     my $home = Jobeet::Models->get('home');
-    
+
     return {
         database => [
             'dbi:SQLite:' . $home->file('database.db'), '', '',
@@ -139,7 +139,7 @@ Arkのモデルについての詳細は明日学習します。詳しいこと�
 スキーマのバージョニング
 --------------------
 
-Arkモデルについてはまた明日学習することにして、DBIx::Class がサポートするスキーマのバージョニングについて学習していきましょう。
+Arkモデルについてはまた明日学習することにして、GitDDLを用いたスキーマのバージョニングを試してみましょう｡
 
 以下のようなストーリーを考えてみてください。
 
@@ -150,28 +150,56 @@ Arkモデルについてはまた明日学習することにして、DBIx::Class
 
 自分の環境だけですむならそれでもそんなに苦労はしないでしょう。しかし手元の開発環境と、ステージングサーバー、そして本番サーバーなど、いろんな環境にその修正をしなければいけなかったとしたらどうでしょう。そのようなシステムではデータベース定義の変更というのは細心の注意を払う必要があります。
 
-DBIx::Class はデータベースのバージョニングをサポートするのでそのような苦労をする必要はありません。コードのデータベースバージョンが、実際のデータベースのバージョンより新しくなっていたら（誰かがデータベース定義を更新したら）DBIx::Class はアプリケーション起動時に警告を出してくれますし、コマンド一つで最新のデータベース定義へデータベースを更新することが出来ます。
+GitDDL を使えばそのような苦労をする必要はありません。コードのデータベースバージョンが、実際のデータベースのバージョンより新しくなっていたら（誰かがデータベース定義を更新したら）コマンド一つで最新のデータベース定義へデータベースを更新することが出来ます。
 
-それでは作業に入りましょう。DBIx::Class でバージョニングサポートを有効にするには DBIx::Class::Schema::Versioned を使います。Jobeet::Schema を以下のように修正しましょう。
+それでは作業に入りましょう。
+昨日作った `create_ddl.pl` `migrate.pl` のDB情報を取得する部分をconfig.plから読み直す設定に変更しまししょう｡
 
-    package Jobeet::Schema;
+create_ddl.pl
+
+    use v5.18.4;
     use strict;
     use warnings;
-    use parent 'DBIx::Class::Schema';
-    use DateTime;
-    
-    our $VERSION = '0';
-    
-    __PACKAGE__->load_namespaces;
-    
-    sub TZ    {state $TZ = DateTime::TimeZone->new(name => 'Asia/Tokyo')}
-    sub now   {DateTime->now(time_zone => shift->TZ, locale => 'ja')}
-    sub today {shift->now->truncate(to => 'day')}:w
-    
-    __PACKAGE__->load_components('Schema::Versioned');
-    __PACKAGE__->upgrade_directory('sql/');
-    
-    1;
+    use utf8;
+    use lib 'lib';
+
+    use Jobeet::Models;
+    use SQL::Translator;
+    use DBIx::Class::Optional::Dependencies;
+    use Path::Class;
+
+    my $sql_file = './schema.sql';
+    my $file     = Path::Class::file($sql_file);
+
+    my $output = models('Schema')->deployment_statements(
+    undef, undef, undef, {
+        no_comments    => 1,
+        add_drop_table => 1,
+        }
+    );
+
+    $file->parent->mkpath;
+    $file->spew( iomode => '>:encoding(UTF-8)', $output );
+
+
+migrate.pl
+
+    use v5.18.4;
+    use strict;
+    use warnings;
+    use utf8;
+
+    use lib 'lib';
+
+    use Jobeet::Models;
+    use GitDDL;
+
+    my $dsn = models('conf')->{database}->[0];
+    my $gd = GitDDL->new(
+        work_tree => './',
+        ddl_file  => './schema.sql',
+        dsn       => models('conf')->{database},
+    );
 
 変更点はバージョニングのためのバージョン情報（`$VERSION`）を追加したのと `Schema::Versioned` コンポーネントをロードし sql 定義ファイルのディレクトリを指定します。
 
@@ -185,31 +213,31 @@ DBIx::Class はデータベースのバージョニングをサポートする�
 です。scriptディレクトリを作成し、`script/create_ddl.pl` として以下のような物を書いてください。
 
     #!/usr/bin/env perl
-    
+
     use strict;
     use warnings;
     use FindBin::libs;
     use Path::Class qw/file/;
-    
+
     use Jobeet::Models;
-    
+
     my $schema = models('Schema');
-    
+
     my $current_version = $schema->schema_version;
     my $next_version    = $current_version + 1;
-    
+
     $schema->create_ddl_dir(
         [qw/SQLite MySQL/],
         $next_version,
         "$FindBin::Bin/../sql/",
     );
-    
+
     {   # replace version
         my $f = file( $INC{'Jobeet/Schema.pm'} );
         my $content = $f->slurp;
         $content =~ s/(\$VERSION\s*=\s*(['"]))(.+?)\2/$1$next_version$2/
             or die "Failed to replace version.";
-    
+
         my $fh = $f->openw or die $!;
         print $fh $content;
         $fh->close;
@@ -238,73 +266,73 @@ Jobeet::Schema を開き直し、`$VERSION` が更新され 1 になっている
 もう一つのスクリプトはこの DDL ファイルを使用して実際のデータベースをアップグレードする物です。`script/upgrade_database.pl` として以下のようなスクリプトを作成してください。
 
     #!/usr/bin/env perl
-    
+
     use strict;
     use warnings;
     use FindBin::libs;
     use Path::Class 'file';
-    
+
     use Getopt::Long;
-    
+
     GetOptions(
         \my %options,
         qw/dry-run/
     );
-    
+
     use SQL::Translator;
     use SQL::Translator::Diff;
-    
+
     use Jobeet::Models;
-    
+
     my $schema = models('Schema');
-    
+
     my $sqltargs = {
         add_drop_table          => 1,
         ignore_constraint_names => 1,
         ignore_index_names      => 1,
     };
-    
+
     sub parse_sql {
         my ($file, $type) = @_;
-    
+
         my $t = SQL::Translator->new($sqltargs);
-    
+
         $t->parser($type)
             or die $t->error;
-    
+
         my $out = $t->translate("$file")
             or die $t->error;
-    
+
         my $schema = $t->schema;
-    
+
         $schema->name( $file->basename )
             unless ( $schema->name );
-    
+
         $schema;
     }
-    
+
     no warnings 'redefine', 'once';
     my $upgrade_file;
     local *Jobeet::Schema::create_upgrade_path = sub {
         $upgrade_file = $_[1]->{upgrade_file};
-    
+
         my $current_version = $schema->get_db_version;
         my $schema_version  = $schema->schema_version;
         my $database        = $schema->storage->sqlt_type;
         my $dir             = $schema->upgrade_directory;
-    
+
         my $prev_file = $schema->ddl_filename($database, $current_version, $dir);
         my $next_file = $schema->ddl_filename($database, $schema_version, $dir);
-    
+
         my $current_schema = eval { parse_sql file($prev_file), $database } or die $@;
         my $next_schema    = eval { parse_sql file($next_file), $database } or die $@;
-    
+
         my $diff = SQL::Translator::Diff::schema_diff(
             $current_schema, $database,
             $next_schema, $database,
             $sqltargs,
         );
-    
+
         if ($upgrade_file) {
             my $fh = file($upgrade_file)->openw or die $!;
             print $fh $diff;
@@ -314,7 +342,7 @@ Jobeet::Schema を開き直し、`$VERSION` が更新され 1 になっている
             print $diff;
         }
     };
-    
+
     if ($schema->get_db_version) {
         if ($options{'dry-run'}) {
             $schema->create_upgrade_path;
@@ -409,25 +437,25 @@ database.db という config.pl で指定したデータベースが作成され
 
 データベースにテーブルが作成されました。しかしデータがありません。 Web アプリケーションには3種類のデータがあります:
 
- * 初期データ: アプリケーションを動作させるのに必要なデータ。 たとえば、Jobeet ではカテゴリが必要となります。 もしカテゴリが無ければ誰も仕事を投稿できなくなります。 
+ * 初期データ: アプリケーションを動作させるのに必要なデータ。 たとえば、Jobeet ではカテゴリが必要となります。 もしカテゴリが無ければ誰も仕事を投稿できなくなります。
  * テストデータ: アプリケーションのテストに必要です。 開発者にとって、ストーリーどおりに Jobeet が動作するのを確認するためにテストを書きます。 自動化テストを書くのが1番よい方法です。 テストを実施するたびにテストデータでデータベースをクリアする必要があります。
  * ユーザーデータ: アプリケーションの運用中にユーザーによって作られたデータ
 
 テストデータに関しては後日学習しましょう。 初期データをいれるのには DBIx::Class の学習もかねて初期データをいれるスクリプトを書いてみましょう。script/insert_default_data.pl と言う名前で以下のようなスクリプトを書いてみてください。
 
     #!/usr/bin/env perl
-    
+
     use strict;
     use warnings;
     use FindBin::libs;
-    
+
     use Jobeet::Models;
-    
+
     # create default Categories
     for my $category_name (qw/Design Programming Manager Administrator/) {
         models('Schema::Category')->create({ name => $category_name });
     }
-    
+
     # create default Jobs
     my $programming_category =
         models('Schema::Category')->find({ name => 'Programming' });
@@ -446,7 +474,7 @@ database.db という config.pl で指定したデータベースが作成され
         email        => 'job@example.com',
         expires_at   => '2010-10-10',
     });
-    
+
     my $design_category = models('Schema::Category')->find({ name => 'Design' });
     $design_category->add_to_jobs({
         type         => 'part-time',
@@ -485,4 +513,3 @@ database.db という config.pl で指定したデータベースが作成され
 
 今日でデータベースを使用する準備は完全に整いました。
 明日は、Web フレームワークで最もよく使われるパラダイムの1つである MVC デザインパターンについて話します。
-
