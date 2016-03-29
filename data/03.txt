@@ -769,14 +769,7 @@ ORM からデータベースにアクセスする
 
 Ark からこのモデルを使用するのは明日にして、今日はこのクラスのみを少し使ってみましょう。
 
-その前に必要なモジュールをインストールするため`cpanfile`に以下を追記しましょう｡
-
-    requires 'GitDDL'
-    requires 'Path::Class
-
-追加できたら`carton install`でモジュールのインストールを行ってください｡
-
-それでは､以下のようなスクリプトを create_ddl.pl としてアプリケーションディレクトリに作ってみましょう。
+以下のようなスクリプトを deploy.pl としてアプリケーションディレクトリに作ってみましょう。
 
     use v5.18.4;
     use strict;
@@ -784,40 +777,23 @@ Ark からこのモデルを使用するのは明日にして、今日はこの�
     use utf8;
 
     use Jobeet::Schema;
-    use SQL::Translator;
-    use DBIx::Class::Optional::Dependencies;
-    use Path::Class;
-
-    my $schema   = Jobeet::Schema->connect('dbi:SQLite:./test.db');
-    my $sql_file = './schema.sql';
-    my $file     = Path::Class::file($sql_file);
-
-    my $output = $schema->deployment_statements(
-        undef, undef, undef, {
-            no_comments    => 1,
-            add_drop_table => 1,
-        }
-    );
-
-    $file->parent->mkpath;
-    $file->spew( iomode => '>:encoding(UTF-8)', $output );
+    my $schema = Jobeet::Schema->connect('dbi:SQLite:./test.db');
+    $schema->deploy;
 
 
 そしてこれを実行してみてください。
 
-    $ carton exec perl create_ddl.pl
+    $ carton exec perl deploy.pl
 
-これはなにも出力されず終わるかもしれません。しかし同じディレクトリに test.db と言うファイルが出来ていませんか？ このスクリプトは test.db という SQLite データベースを作成します。
+これはなにも出力されず終わるかもしれません。しかし同じディレクトリに test.db と言うファイルが出来ていませんか？ このスクリプトは test.db という SQLite データベースを作成します。そしてそれは今日定義したテーブル定義も含まれます！
 
-更に schema.sql というファイルが出来ていると思います｡
+DBIx::Class は `DBIC_TRACE` と言う環境変数でどのような SQL が実行されているか確認することが出来ます。
+いちど今作成した test.db を削除し、この環境変数とともにもう一度スクリプトを走らせてみましょう。
 
-これは今日定義したテーブルをSQLに出力したものになります｡
+    $ rm test.db
+    $ DBIC_TRACE=1 carton exec perl deploy.pl
 
-うまくいっていれば`schema.sql`はこのように出力がされているはずです：
-
-    BEGIN TRANSACTION;
-
-    DROP TABLE IF EXISTS jobeet_affiliate;
+うまくいっていればこのように出力がされているはずです：
 
     CREATE TABLE jobeet_affiliate (
         id INTEGER PRIMARY KEY NOT NULL,
@@ -826,21 +802,13 @@ Ark からこのモデルを使用するのは明日にして、今日はこの�
         token VARCHAR(80) NOT NULL,
         is_active TINYINT NOT NULL DEFAULT 0,
         created_at DATETIME NOT NULL
-    );
-
-    CREATE UNIQUE INDEX jobeet_affiliate_email ON jobeet_affiliate (email);
-
-    DROP TABLE IF EXISTS jobeet_category;
-
+    ):
+    CREATE UNIQUE INDEX jobeet_affiliate_email ON jobeet_affiliate (email):
     CREATE TABLE jobeet_category (
         id INTEGER PRIMARY KEY NOT NULL,
         name VARCHAR(255) NOT NULL
-    );
-
-    CREATE UNIQUE INDEX jobeet_category_name ON jobeet_category (name);
-
-    DROP TABLE IF EXISTS jobeet_job;
-
+    ):
+    CREATE UNIQUE INDEX jobeet_category_name ON jobeet_category (name):
     CREATE TABLE jobeet_job (
         id INTEGER PRIMARY KEY NOT NULL,
         category_id INTEGER NOT NULL,
@@ -857,99 +825,21 @@ Ark からこのモデルを使用するのは明日にして、今日はこの�
         created_at DATETIME NOT NULL,
         updated_at DATETIME NOT NULL,
         FOREIGN KEY (category_id) REFERENCES jobeet_category(id) ON UPDATE CASCADE
-    );
-
-    CREATE INDEX jobeet_job_idx_category_id ON jobeet_job (category_id);
-
-    CREATE UNIQUE INDEX jobeet_job_token ON jobeet_job (token);
-
-    DROP TABLE IF EXISTS jobeet_category_affiliate;
-
+    ):
+    CREATE INDEX jobeet_job_idx_category_id ON jobeet_job (category_id):
+    CREATE UNIQUE INDEX jobeet_job_token ON jobeet_job (token):
     CREATE TABLE jobeet_category_affiliate (
         category_id INTEGER NOT NULL,
         affiliate_id INTEGER NOT NULL,
         PRIMARY KEY (category_id, affiliate_id),
         FOREIGN KEY (affiliate_id) REFERENCES jobeet_affiliate(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (category_id) REFERENCES jobeet_category(id) ON DELETE CASCADE ON UPDATE CASCADE
-    );
+    ):
+    CREATE INDEX jobeet_category_affiliate_idx_affiliate_id ON jobeet_category_affiliate (affiliate_id):
+    CREATE INDEX jobeet_category_affiliate_idx_category_id ON jobeet_category_affiliate (category_id):
 
-    CREATE INDEX jobeet_category_affiliate_idx_affiliate_id ON jobeet_category_affiliate (affiliate_id);
-
-    CREATE INDEX jobeet_category_affiliate_idx_category_id ON jobeet_category_affiliate (category_id);
-
-    COMMIT;
-
-
-ではこのsqlを作成した `test.db` に反映してみましょう｡
-
-GitDDLは
-
-    GitDDL - database migration utility for git managed sql
-
-とあるようにsqlファイルのバージョンを元にデータベースのバージョン管理を行います｡
-そのため `schema.sql` をコミットしていない場合は事前にコミットしておきましょう｡
-
-では､以下のようなスクリプトを migrate.pl としてアプリケーションディレクトリに作りましょう｡
-
-    use v5.18.4;
-    use strict;
-    use warnings;
-    use utf8;
-
-    use GitDDL;
-
-    my $gd = GitDDL->new(
-        work_tree => './',
-        ddl_file  => './schema.sql',
-        dsn       => ['dbi:SQLite:./test.db'],
-    );
-
-    my $db_version = '';
-    eval {
-        open my $fh, '>', \my $stderr;
-        local *STDERR = $fh;
-        $db_version   = $gd->database_version;
-    };
-
-    if (!$db_version) {
-        $gd->deploy;
-        say 'done migrate';
-        exit;
-    }
-
-    if ($gd->check_version) {
-        say 'Database is already latest';
-    }
-    else {
-        print $gd->diff . "\n";
-        $gd->upgrade_database;
-        say 'done migrate';
-    }
-
-では実行してみましょう｡
-
-    $ carton exec perl migrate.pl
-    done migrate
-
-確認してみましょう
-
-    $ sqlite3 test.db
-    sqlite> select name from sqlite_master where type = 'table';
-    jobeet_affiliate
-    jobeet_category
-    jobeet_job
-    jobeet_category_affiliate
-    git_ddl_version
-
-今日作成したテーブルが反映されたかと思います｡
-
-ちなみに `git_ddl_version` は GitDDL で利用するテーブルになります｡
-
-このような事をしなくても`DBIx::Class`だけで SQLの反映が行えます｡
-しかし複数人で開発する場合や､ 別branchで並行して開発するときなどに`GitDDL`は非常に有用です｡
-また､実際にデータベースに反映されるSQLの差分を確認する事ができるのも大きな利点といえるでしょう｡
-
-ちなみに､`DBIx::Class`は1種類のデータベース定義だけで MySQL、SQLite、PostgreSQL、Oracle、DB2、MSSQL などのさまざまなデータベースを作成・利用することが出来ます。
+`DBIx::Class` ではこのように SQL を自動的に生成します。
+このためにたった1種類のデータベース定義だけで MySQL、SQLite、PostgreSQL、Oracle、DB2、MSSQL などのさまざまなデータベースを作成・利用することが出来ます。
 
 SQLite以外のデータベース環境が利用できる人は先ほどのスクリプトの connect 先を変更してもうまく動くか確かめてみてください。たとえば MySQL なら
 
@@ -959,7 +849,7 @@ SQLite以外のデータベース環境が利用できる人は先ほどのス�
         'password',
     );
 
-このようにかくだけで MySQL にテーブルが作られます。（データベースは存在している必要があります）
+のようにかくだけで MySQL にテーブルが作られます。（データベースは存在している必要があります）
 
 データベースができたので実際にアクセスしてみましょう。以下のようなスクリプトを書いてみてください。
 
@@ -1049,8 +939,8 @@ Result クラスではそれを表す Row にたいしてさまざまな処理�
 明日お会いしましょう
 -----------------
 
-今日はここまでです。今日は DBIx::Class, GitDDLを使用したデータベースの使用方法を学習しました。
+今日はここまでです。今日は DBIx::Class を使用したデータベースの使用方法を学習しました。
 
 まだエネルギーが残っていたら、DBIx::Class のドキュメントを参照し今回説明しなかった使い方について理解を深めてください。そうでなければ気にせずによく寝てください。
 
-明日は今日作成したデータベースのテーブル更新、そして DBIx::Class モデルを Ark から使う方法について話します。
+明日は今日作成したデータベースのバージョニング、そして DBIx::Class モデルを Ark から使う方法について話します。
