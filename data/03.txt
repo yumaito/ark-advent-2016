@@ -115,7 +115,7 @@ Jobeet のための `Jobeet::Schema` を作成しましょう。
 `lib/Jobeet/Schema.pm` を作成し、以下のように編集してみましょう。
 
     package Jobeet::Schema;
-    use v5.18.4;
+    use v5.20.3;
     use strict;
     use warnings;
     use parent 'DBIx::Class::Schema';
@@ -159,7 +159,7 @@ Perl のクラスのファイル名はほとんどの場合パッケージ名か
 `DBIx::Class` の Result クラスは、`DBIx::Class` を継承して作成し、
 
     package Jobeet::Schema::Result::Job;
-    use v5.18.4;
+    use v5.20.3;
     use strict;
     use warnings;
     use parent 'DBIx::Class';
@@ -174,7 +174,7 @@ Perl のクラスのファイル名はほとんどの場合パッケージ名か
 他にもさまざまなコンポーネントがありますが、ここではこれに加えて `InflateColumn::DateTime` コンポーネントもロードするようにしてみましょう。
 
     package Jobeet::Schema::Result::Job;
-    use v5.18.4;
+    use v5.20.3;
     use strict;
     use warnings;
     use parent 'DBIx::Class';
@@ -190,7 +190,7 @@ Perl のクラスのファイル名はほとんどの場合パッケージ名か
 これをすべての Result クラスそれぞれに書くのは面倒ですし無駄です。また `DBIx::Class` はこのように定義が重複するとパフォーマンスが悪くなります。こういう場合は共通のベースクラスを作成し、定義を一元化させるのが `DBIx::Class` をつかう上での重要なベストプラクティスとなっています。 そこでこれら共通の処理をまとめ `Jobeet::Schema::ResultBase` としてベースクラスを定義してみましょう。
 
     package Jobeet::Schema::ResultBase;
-    use v5.18.4;
+    use v5.20.3;
     use strict;
     use warnings;
     use parent 'DBIx::Class';
@@ -202,7 +202,7 @@ Perl のクラスのファイル名はほとんどの場合パッケージ名か
 そしてこれを使用してさきほどの Job クラスを書き換えると
 
     package Jobeet::Schema::Result::Job;
-    use v5.18.4;
+    use v5.20.3;
     use strict;
     use warnings;
     use parent 'Jobeet::Schema::ResultBase';
@@ -393,7 +393,7 @@ Perl のクラスのファイル名はほとんどの場合パッケージ名か
 同様に他のテーブルクラスを定義していきましょう。 Categoryクラス：
 
     package Jobeet::Schema::Result::Category;
-    use v5.18.4;
+    use v5.20.3;
     use strict;
     use warnings;
     use parent 'Jobeet::Schema::ResultBase';
@@ -424,7 +424,7 @@ Perl のクラスのファイル名はほとんどの場合パッケージ名か
 CategoryAffiliate クラス：
 
     package Jobeet::Schema::Result::CategoryAffiliate;
-    use v5.18.4;
+    use v5.20.3;
     use strict;
     use warnings;
     use parent 'Jobeet::Schema::ResultBase';
@@ -455,7 +455,7 @@ CategoryAffiliate クラス：
 Affiliate クラス:
 
     package Jobeet::Schema::Result::Affiliate;
-    use v5.18.4;
+    use v5.20.3;
     use strict;
     use warnings;
     use parent 'Jobeet::Schema::ResultBase';
@@ -510,7 +510,7 @@ Affiliate クラス:
 
 
     package Jobeet::Schema::Types;
-    use v5.18.4;
+    use v5.20.3;
     use parent 'Exporter';
     our @EXPORT = qw/PK_INTEGER INTEGER VARCHAR TINYINT DATETIME/;
 
@@ -771,7 +771,7 @@ Ark からこのモデルを使用するのは明日にして、今日はこの�
 
 以下のようなスクリプトを deploy.pl としてアプリケーションディレクトリに作ってみましょう。
 
-    use v5.18.4;
+    use v5.20.3;
     use strict;
     use warnings;
     use utf8;
