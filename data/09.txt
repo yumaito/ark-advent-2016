@@ -29,7 +29,7 @@ Ark のフォームは 1 フォーム 1 クラスで表されます。
 
     package MyContactForm;
     use Ark 'Form';
-    
+
     param subject => (
         label       => 'Subject',
         type        => 'TextField',
@@ -38,20 +38,20 @@ Ark のフォームは 1 フォーム 1 クラスで表されます。
             [ 'LENGTH', 0, 100 ],
         ],
     );
-    
+
     param message => (
         label       => 'Message',
         type        => 'TextField',
         widget      => 'textarea',
         constraints => ['NOT_NULL'],
     );
-    
+
     param sender => (
         label       => 'E-Mail',
         type        => 'EmailField',
         constraints => ['NOT_NULL'],
     );
-    
+
     1;
 
 フォームクラスはこのように param シンタックスを使いフィールドを定義していきます。
@@ -75,21 +75,21 @@ constraints の項目には型にあらかじめ用意されているバリデ�
 
     package MyContactForm2;
     use Ark 'Form';
-    
+
     extends 'MyContactForm';
-    
+
     param '+message' => (
         constraints => [
             'NOT_NULL',
             ['LENGTH', 0, 3000],
         ],
     );
-    
+
     param url => (
         label => 'URL',
         type  => 'TextField',
     );
-    
+
     1;
 
 このフォームは message フィールドにバリデーションルールを追加し、新しく URL フィールドを追加しています。
@@ -106,9 +106,9 @@ constraints の項目には型にあらかじめ用意されているバリデ�
 
     package Jobeet::Form::Job;
     use Ark 'Form';
-    
+
     use Jobeet::Models;
-    
+
     param category => (
         label   => 'Category',
         type    => 'ChoiceField',
@@ -117,7 +117,7 @@ constraints の項目には型にあらかじめ用意されているバリデ�
             'NOT_NULL',
         ],
     );
-    
+
     param type => (
         label   => 'Type',
         type    => 'ChoiceField',
@@ -130,7 +130,7 @@ constraints の項目には型にあらかじめ用意されているバリデ�
             'NOT_NULL',
         ],
     );
-    
+
     param company => (
         label       => 'Company',
         type        => 'TextField',
@@ -138,12 +138,12 @@ constraints の項目には型にあらかじめ用意されているバリデ�
             'NOT_NULL',
         ],
     );
-    
+
     param url => (
         label => 'URL',
         type  => 'URLField',
     );
-    
+
     param position => (
         label       => 'position',
         type        => 'TextField',
@@ -151,7 +151,7 @@ constraints の項目には型にあらかじめ用意されているバリデ�
             'NOT_NULL',
         ],
     );
-    
+
     param location => (
         label       => 'Location',
         type        => 'TextField',
@@ -159,7 +159,7 @@ constraints の項目には型にあらかじめ用意されているバリデ�
             'NOT_NULL',
         ],
     );
-    
+
     param description => (
         label       => 'Description',
         type        => 'TextField',
@@ -172,7 +172,7 @@ constraints の項目には型にあらかじめ用意されているバリデ�
             'NOT_NULL',
         ],
     );
-    
+
     param how_to_apply => (
         label       => 'How to apply?',
         type        => 'TextField',
@@ -185,7 +185,7 @@ constraints の項目には型にあらかじめ用意されているバリデ�
             'NOT_NULL',
         ],
     );
-    
+
     param email => (
         label       => 'Email',
         type        => 'TextField',
@@ -193,7 +193,7 @@ constraints の項目には型にあらかじめ用意されているバリデ�
             'NOT_NULL',
         ],
     );
-    
+
     1;
 
 Job コントローラからこのフォームクラスを使用します。
@@ -202,11 +202,17 @@ Job コントローラからこのフォームクラスを使用します。
     with 'Ark::ActionClass::Form';
 
 という行を入れましょう。これを入れるとアクションに `:Form` 属性を使うことができるようになります。
-ここでは求人登録のアクション create アクションにこのフォームクラスを紐付けます。
+ここでは求人登録のアクション create アクションにこのフォームクラスを紐付けます。以下のようになるかと思います｡
+
+    package Jobeet::Controller::Job;
+    use Ark 'Controller';
+    with 'Ark::ActionClass::Form';
+
+    ...
 
     sub create :Local :Form('Jobeet::Form::Job') {
         my ($self, $c) = @_;
-    
+
         $c->stash->{form} = $self->form;
     }
 
@@ -214,18 +220,18 @@ Job コントローラからこのフォームクラスを使用します。
 またこのアクションに対応するテンプレート job/create.mt はまだ作っていませんでした。ここで作成しましょう。
 
     ? extends 'common/jobs_base';
-    
+
     ? block content => sub {
-    
+
     <h1>New Job</h1>
-    
+
     <form method="post">
     <?= $c->stash->{form}->render ?>
     <input type="submit" value="Preview your job" />
     </form>
-    
+
     ? } # endblock content
-    
+
 
 このように render メソッドを使用することでフォームのhtmlをレンダリングすることができます。
 また `render('name')` などのようにフィールド名を指定するとそのフィールドだけをレンダリングすることもできます。
@@ -233,15 +239,15 @@ Job コントローラからこのフォームクラスを使用します。
 また render の代わりに label、input、error、メソッドを使用するとそれぞれラベル、inputフィールド、エラー文字列をそれぞれ個別にレンダリングすることもできます。ここではこれを使用してテンプレートを変更していきます。
 
     ? my $form = $c->stash->{form};
-    
+
     ? extends 'common/jobs_base';
-    
+
     ? block content => sub {
-    
+
     <h1>New Job</h1>
-    
+
     <form method="post">
-    
+
     <table id="job_form">
       <tfoot>
         <tr>
@@ -269,7 +275,7 @@ Job コントローラからこのフォームクラスを使用します。
       </tbody>
     </table>
     </form>
-    
+
     ? } # endblock content
 
 スタイルの効いたフォームが表示されたでしょうか。
@@ -285,5 +291,3 @@ Job コントローラからこのフォームクラスを使用します。
 明日答え合わせをしましょう。
 
 それではまた明日！
-
-
