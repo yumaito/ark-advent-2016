@@ -9,39 +9,39 @@
 
     package Jobeet::Controller::Search;
     use Ark 'Controller';
-    
+
     use Jobeet::Models;
-    
+
     sub index :Path {
         my ($self, $c) = @_;
-    
+
         my $query = $c->req->param('q')
             or $c->detach('/default');
-    
+
         $c->stash->{jobs} = models('Schema::Job')->search_fulltext($query);
     }
-    
+
     1;
 
 テンプレート（`search/index.mt`）も非常に単刀直入です:
 
     ? extends 'common/jobs_base';
-    
+
     ? block content => sub {
-    
+
     <div id="jobs">
     ?= include('job/_partial_jobs', $c->stash->{jobs}->all );
     </div>
-    
+
     ? } # endblock content
-    
+
 
 検索自身は `search_fulltext` メソッドにデリゲートされます:
 
     # Jobeet::Schema::ResultSet::Job
     sub search_fulltext {
         my ($self, $word) = @_;
-    
+
         my $r = $self->search(
             {
                 is_activated => 1,
@@ -76,5 +76,3 @@
 今日は、1時間以内に多くの機能を持つ検索エンジンを実装しました。プロジェクトに新しい機能を追加したいと思うたびに、他のどこかで未解決であることを確認します。最初に、Ark フレームワークでネイティブに実装されてないことをチェックし、Ark プラグインをチェックします。 CPANライブラリをチェックするのはお忘れなく。
 
 明日は、ユーザーが検索ボックスで入力する際にリアルタイムで検索結果を更新することで検索エンジンのレスポンスを強化するために慎ましく JavaScriptを使います。もちろん、ArkでAJAXを使う方法を語る機会があります。
-
-
