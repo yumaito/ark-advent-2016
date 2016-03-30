@@ -51,7 +51,7 @@ get と違いリクエストを自由につくれるので GET 以外にも POST
 
     my $c = ctx_get('/job/');
     my ($content, $c) = ctx_get('/job/');
-    
+
     my $c = ctx_request($request);
     my ($response, $c) = ctx_request($request);
 
@@ -106,7 +106,7 @@ perl ではこのような Fixture データを用意するモジュールがい
             name => $category_name
         });
     }
-    
+
     # create default Jobs
     my $programming_category =
         models('Schema::Category')->find({ name => 'Programming' });
@@ -125,7 +125,7 @@ perl ではこのような Fixture データを用意するモジュールがい
         email        => 'job@example.com',
         expires_at   => '2010-10-10',
     });
-    
+
     my $design_category = models('Schema::Category')->find({ name => 'Design' });
     $design_category->add_to_jobs({
         type         => 'part-time',
@@ -142,7 +142,7 @@ perl ではこのような Fixture データを用意するモジュールがい
         email        => 'job@example.com',
         expires_at   => '2010-10-10',
     });
-    
+
     {
         my $cat_programming = models('Schema::Category')->find({ name => 'Programming' });
         my $job = models('Schema::Job')->create({
@@ -162,14 +162,14 @@ perl ではこのような Fixture データを用意するモジュールがい
             expires_at => '2005-12-31',
         });
     }
-    
-    
+
+
     {
         my $job_rs = models('Schema::Job');
         my $cat_rs = models('Schema::Category');
-        
+
         my $cat_programming = $cat_rs->find({ name => 'Programming' });
-        
+
         for my $i (100 .. 130) {
             my $job = $job_rs->create({
                 category_id  => $cat_programming->id,
@@ -185,7 +185,7 @@ perl ではこのような Fixture データを用意するモジュールがい
             });
         }
     }
-    
+
     1;
 
 最後に `1;` を付け加えていることに注意してください。 Perl は外部ファイル読み込み時にそのスクリプトが真を返すことを期待しています。したがってこのようにおまじない的に `1;` をつけるようになっています。
@@ -193,14 +193,14 @@ perl ではこのような Fixture データを用意するモジュールがい
 このコードスニペットを使用するにはどうするのでしょう。最初に `script/insert_default_data.pl` 自体を書き換えてみましょう。以下のようになります。
 
     #!/usr/bin/env perl
-    
+
     use strict;
     use warnings;
     use FindBin::libs;
-    
+
     use DateTime;
     use Jobeet::Models;
-    
+
     my $datafile = models('home')->subdir(qw/sql fixtures/)->file('default.pl');
     do $datafile or die $!;
 
@@ -216,10 +216,10 @@ Categoryコントローラのテスト
 
     sub show :Path :Args(1) {
         my ($self, $c, $category_name) = @_;
-    
+
         my $category = models('Schema::Category')->find({ slug => $category_name })
             or $c->detach('/default');
-    
+
         $c->stash->{category} = $category;
         $c->stash->{jobs} = $category->get_active_jobs({
             rows => models('conf')->{max_jobs_on_category},
@@ -236,20 +236,20 @@ Categoryコントローラのテスト
 
 とういうようになります。順番にやっていきましょう。コントローラのテストには `t/controller` と言うディレクトリを使うようにしましょう。
 
-まずひな形を作ります、`t/06_controller_category.t` を以下のように編集してください：
+まずひな形を作ります、`t/controller/06_controller_category.t` を以下のように編集してください：
 
     use strict;
     use warnings;
-    
+
     use Test::More;
     use Jobeet::Test;
     use Jobeet::Models;
-    
+
     my $datafile = models('home')->subdir(qw/sql fixtures/)->file('default.pl');
     do $datafile or die $!;
-    
+
     # ここにテストを書く
-    
+
     done_testing;
 
 コメントアウトした部分にテストコードを追加していきましょう。
@@ -302,7 +302,7 @@ pageクエリの値が反映されているかをチェックします
         my $c = ctx_get('/category/programming');
         is $c->stash->{jobs}->pager->current_page, 1, 'current page 1 ok';
     }
-    
+
     {
         my $c = ctx_get('/category/programming?page=2');
         is $c->stash->{jobs}->pager->current_page, 2, 'current page 2 ok';
@@ -314,8 +314,8 @@ pageクエリの値が反映されているかをチェックします
 
 Category コントローラのテストはこれで一通り書き終えました。実行してみましょう：
 
-    $ prove -lv t/controller/category.t
-    t/controller/category.t .. 
+    $ prove -lv t/controller/06_controller_category.t
+    t/controller/06_controller_category.t ..
     ok 1 - action called ok
     ok 2 - 404 status ok
     ok 3 - category not set
@@ -341,5 +341,3 @@ Category コントローラのテストはこれで一通り書き終えまし�
 Job コントローラのテストも同様に書いてみてください。Category に比べるとシナリオが多いのでコードはもう少し長くなるはずです。しかしここまでチュートリアルをこなしているあなたならなんということはないでしょう。
 
 それではまた明日お会いしましょう。明日はセッションを使ったユーザー管理について学習します。
-
-
