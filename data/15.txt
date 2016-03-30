@@ -24,9 +24,11 @@
 依存モジュール
 ---------------
 
-バックエンドに使用する Cache::FastMmap をインストールしておきましょう。
+バックエンドに使用する Cache::FastMmap を`cpanfile`に追加してインストールしておきましょう。
 
-    $ cpanm Cache::FastMmap
+    requires 'Cache::FastMmap';
+
+    $ carton install
 
 
 バックエンドモジュールをモデルとして登録
@@ -35,12 +37,16 @@
 `Cache::FastMmap` はキーバリュー形式でデータを保存できるライブラリです。
 これをまずは Ark モデルとして使用できるように登録しましょう、`Jobeet::Models` に以下の行を追加します。
 
+    use Cache::FastMmap;
+
+    ...
+
     register cache => sub {
         my $self = shift;
-    
+
         my $conf = $self->get('conf')->{cache}
             or die 'require cache config';
-    
+
         $self->ensure_class_loaded('Cache::FastMmap');
         Cache::FastMmap->new(%$conf);
     };
@@ -61,29 +67,29 @@ t/models/cache.t という名前で以下のように簡単なテストを書い
     use strict;
     use warnings;
     use Test::More;
-    
+
     use Jobeet::Test;
     use Jobeet::Models;
-    
+
     my $cache = models('cache');
-    
+
     ok $cache, 'cache model return ok';
     isa_ok $cache, 'Cache::FastMmap';
-    
+
     my $test_key = '____test_key____';
-    
+
     ok !$cache->get($test_key), 'cache is not set yet';
-    
+
     $cache->set($test_key => 'Hello');
-    
+
     is $cache->get($test_key), 'Hello', 'cache set ok';
-    
+
     $cache->remove($test_key);
-    
+
     ok !$cache->get($test_key), 'cache remove ok';
-    
+
     done_testing;
-    
+
 
 モデル取得のテストとデータの更新、取得、削除を行っています。
 
@@ -104,11 +110,11 @@ Ark ではセッション機能はプラグインをして提供されます。�
     config 'Plugin::Session' => {
         expires => '+30d',
     };
-    
+
     config 'Plugin::Session::State::Cookie' => {
         cookie_name => 'jobeet_session',
     };
-    
+
     config 'Plugin::Session::Store::Model' => {
         model => 'cache',
     };
@@ -127,17 +133,17 @@ Ark ではセッション機能はプラグインをして提供されます。�
 
     sub show :Path :Args(1) {
         my ($self, $c, $job_token) = @_;
-    
+
         $c->stash->{job} = models('Schema::Job')->find({ token => $job_token })
             or $c->detach('/default');
-    
+
         my $history = $c->session->get('job_history') || [];
-    
+
         unshift @$history, { $c->stash->{job}->get_columns };
-    
+
         $c->session->set( job_history => $history );
     }
-    
+
 ユーザーのセッションにアクセスするには、`$c->session` メソッドを使います。そこからさらに
 
  * `->get($key)` - $key 名で保存されたデータを取得
@@ -148,7 +154,7 @@ Ark ではセッション機能はプラグインをして提供されます。�
 
 このコードは、見ている Job を順に `job_history` という名前でセッションに保存しています。
 
-このアクセス履歴を表示するために、ベーステンプレートの content ブロックの手前に以下のコードを追加しましょう：
+このアクセス履歴を表示するために、ベーステンプレート(common/base.mt)の content ブロックの手前に以下のコードを追加しましょう：
 
     ? my @history = @{ $c->session->get('job_history') || [] };
     ? if (@history) {
@@ -165,11 +171,11 @@ Ark ではセッション機能はプラグインをして提供されます。�
             </ul>
           </div>
     ? } # endif @history
-     
+
           <div id="content">
             <div class="content">
     ? block content => '';
-    
+
 そして適当なジョブを作成してみてください。
 
 ![job history](./images/15/job_history.png)
@@ -183,5 +189,3 @@ Ark ではセッション機能はプラグインをして提供されます。�
 ------
 
 Ark の偉大なプラグインシステムとCPANに存在する汎用的なKVS(Key Value Store)モジュールを結びつけることで短時間でJobeetセッションを実装することができました。モデルクラスを差し替えればアプリケーションコードを変更することなくセッションのバックエンドを変更できます。
-
-
