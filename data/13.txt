@@ -12,9 +12,9 @@
     use CGI::Simple;
 
     use_ok 'Jobeet::Form::Job';
-    
+
     # ここにテストを書く
-    
+
     done_testing;
 
 まずテストを書くために `Test::More` を use し、フォームリクエストを作るために `CGI::Simple` を `use` します。
@@ -46,7 +46,7 @@
                 email        => 'for.a.job@example.com',
             }),
         );
-    
+
         ok $f->submitted_and_valid, 'form submitted_and_valid ok';
     }
 
@@ -71,9 +71,9 @@
                 email        => 'not.an.email',
             }),
         );
-    
+
         ok $f->has_error, 'form has error ok';
-    
+
         like $f->error_message_plain('description'),
             qr/required/, 'description required ok';
         like $f->error_message_plain('how_to_apply'),
@@ -114,5 +114,3 @@
 
 今日のフォームのテストの残りは各自の宿題とします。
 それではまた明日。
-
-
