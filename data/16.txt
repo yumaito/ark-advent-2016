@@ -24,7 +24,7 @@
       <updated></updated>
       <author><name>Jobeet</name></author>
       <id>Unique Id</id>
-    
+
       <entry>
         <title>Job title</title>
         <link href="" />
@@ -64,10 +64,10 @@ stash で二つの変数を受け取っています。 これらはコントロ�
     # Jobeet::Schema::ResultSet::Job
     sub latest_post {
         my ($self) = @_;
-    
+
         my $r = $self->search( { is_activated => 1, },
             { order_by => { -desc => 'created_at' } } );
-    
+
         $r->first;
     }
 
@@ -85,12 +85,17 @@ stash で二つの変数を受け取っています。 これらはコントロ�
 
 というように macro 設定を加えると、そこで指定した関数をテンプレート内で使用することができるようになります。
 
+
 コントローラでstashを埋めます：
 
+    use DateTime::Format::W3CDTF;
+
+    ...
 
     $c->stash->{w3c_date} = DateTime::Format::W3CDTF->new;
     $c->stash->{latest_post} = models('Schema::Job')->latest_post;
 
+おっと依存モジュール `DateTime::Format::W3CDTF` をインストールするのを忘れないようにしましょう｡
 
 フィードエントリは次のコードで生成できます：
 
@@ -104,7 +109,7 @@ stash で二つの変数を受け取っています。 これらはコントロ�
          <updated><?= $w3c->format_datetime($job->created_at) ?></updated>
          <summary type="xhtml">
            <div><?= $job->description ?></div>
-    
+
            <h4>How to apply?</h4>
            <p><?= $job->how_to_apply ?></p>
          </summary>
@@ -124,10 +129,10 @@ stash で二つの変数を受け取っています。 これらはコントロ�
     sub atom :Local {
         my ($self, $c) = @_;
         $c->res->content_type('application/atom+xml; charset=utf-8');
-    
+
         $c->stash->{w3c_date} = DateTime::Format::W3CDTF->new;
         $c->stash->{latest_post} = models('Schema::Job')->latest_post;
-    
+
         $c->forward('index');
     }
 
