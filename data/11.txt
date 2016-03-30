@@ -51,7 +51,7 @@ Arkを使ったプロジェクトのテストには、CPAN上にある数多のT
         @_ = ($class, $app, %options);
         goto $class->can('SUPER::import');
     }
-    
+
     1;
 
 テストの先頭で `use Jobeet::Test;` すると、テスト用の新しいデータベースが自動的に作成され、接続先に設定されます。
@@ -133,7 +133,7 @@ prove コマンドには、よく使われるいくつかのオプションが�
 それでは、先程書いた jobeet_test.t を実行してみましょう!
 Jobeetプロジェクトのrootディレクトリに移動して、`prove -lr t/jobeet_test.t`を実行します。
 
-    $ prove -l t/01_jobeet_test.t
+    $ carton exec prove -l t/01_jobeet_test.t
 
     t/jobeet_test.t .. ok
     All tests successful.
@@ -162,6 +162,7 @@ Schema クラスのテストを書く
 新しい `category` を作成して、それに付随する `job` を作ります。
 
 新しくできた `job` は `Jobeet::Schema::Result::Job` オブジェクトであるべきなので、先程 `Test::More` の説明で出て来た `isa_ok` を使用して確認します。
+`t/` 以下に `01_jobeet_schema_result_job.t` というファイルを作りましょう｡
 コードは次のようになります。
 
     use strict;
@@ -195,7 +196,7 @@ Schema クラスのテストを書く
 
 それでは実行してみましょう。
 
-    $ prove -l t/02_jobeet_schema_result_job.t
+    $ prove -l t/01_jobeet_schema_result_job.t
 
     t/jobeet_schema_result_job.t .. ok
     All tests successful.
@@ -219,7 +220,7 @@ Schema クラスのテストを書く
 
 それでは、実行してみます。
 
-    $ prove -l t/02_jobeet_schema_result_job.t
+    $ prove -l t/01_jobeet_schema_result_job.t
 
     t/jobeet_schema_result_job.t .. ok
     All tests successful.
@@ -229,7 +230,7 @@ Schema クラスのテストを書く
 おめでとうございます!! 全てのテストが通りました。
 良い区切りなので、testsの数が 4 だということを`Test::More`に教えてあげます。
 
-最終的に `02_jobeet_schema_result_job.t` は次のようになりました。
+最終的に `01_jobeet_schema_result_job.t` は次のようになりました。
 
     use strict;
     use warnings;
@@ -281,7 +282,7 @@ Schema クラスのテストを書く
 若者は喜び、`Jobeet`を利用しているユーザーはサービスが安定して動いてる事に満足を得てくれるでしょう。
 
 さあ、テストを書いていきましょう。
-`01_jobeet_schema_result_category.t` ファイルを作り、そこに `Jobeet::Schema::Result::Category` のテストを書いていきます。
+`02_jobeet_schema_result_category.t` ファイルを作り、そこに `Jobeet::Schema::Result::Category` のテストを書いていきます。
 
 まず始めに、`insert` 時に `slug` カラムが適切に作られているかをテストします。
 
@@ -304,9 +305,9 @@ Schema クラスのテストを書く
 
 実行してみます。
 
-    $ prove -lr t/03_jobeet_schema_result_category.t
+    $ prove -lr t/02_jobeet_schema_result_category.t
 
-    t/03_jobeet_schema_result_category.t .. ok
+    t/02_jobeet_schema_result_category.t .. ok
     All tests successful.
     Files=1, Tests=1,  1 wallclock secs ( 0.03 usr  0.01 sys +  0.50 cusr  0.08 csys =  0.62 CPU)
     Result: PASS
@@ -322,7 +323,7 @@ Schema クラスのテストを書く
 
 再度、実行してみます。
 
-    $ prove -lr t/jobeet_schema_result_category.t
+    $ prove -lr t/02_jobeet_schema_result_category.t
 
     t/jobeet_schema_result_category.t .. ok
     All tests successful.
@@ -361,7 +362,7 @@ Schema クラスのテストを書く
 ### Jobeet::Schema::ResultSet::Category
 
 
-`04_jobeet_schema_resultset_category.t`ファイルを作り、`Jobeet::Schema::ResultSet::Category`のテストを書いていきます。
+`03_jobeet_schema_resultset_category.t`ファイルを作り、`Jobeet::Schema::ResultSet::Category`のテストを書いていきます。
 
 
 まずはテストに使うデータを作成します。
@@ -409,7 +410,7 @@ Schema クラスのテストを書く
 
 テストを実行します。
 
-    prove -l t/04_jobeet_schema_resultset_category.t
+    prove -l t/03_jobeet_schema_resultset_category.t
 
     t/jobeet_schema_resultset_category.t .. ok
     All tests successful.
@@ -420,21 +421,21 @@ Schema クラスのテストを書く
 `Jobeet::Schema::ResultSet::Category` のテストは完了としましょう。
 
 テストの数を `Test::More` に教えてあげます。
-`jobeet_schema_resultset_category.t` の全コードは、次のようになりました。
+`03_jobeet_schema_resultset_category.t` の全コードは、次のようになりました。
 
     use strict;
     use warnings;
     use Test::More tests => 3;
-    
+
     use Jobeet::Test;
     use Jobeet::Models;
     use DateTime;
-    
+
     {
         ## create test data
         my $programming_category =
             models('Schema::Category')->create({ name => 'Programming' });
-            
+
         my $programming_job = $programming_category->add_to_jobs({
             type         => 'full-time',
             company      => 'Sensio Labs',
@@ -449,28 +450,28 @@ Schema クラスのテストを書く
             token        => 'job_sensio_labs',
             email        => 'job@example.com',
         });
-        
+
         ## do test
         {
             isa_ok models('Schema::Category')->get_with_jobs, 'Jobeet::Schema::ResultSet::Category', 'get_with_jobs: returning "Jobeet::Schema::ResultSet::Category" object';
         }
-        
+
         {
             my $first_job = models('Schema::Category')->get_with_jobs->first;
-            
+
             is $first_job->id, $programming_job->id, 'get_with_jobs: got $programming_job';
         }
-        
+
         {
             my $yesterday = models('Schema')->now->subtract( days => 1 );
-    
+
             # Now, $programming_job expires
             $programming_job->update({ expires_at => $yesterday });
-    
+
             is models('Schema::Category')->get_with_jobs->count, 0, 'get_with_jobs: expired job is not appeared';
         }
     }
-    
+
     done_testing;
 
 ### Jobeet::Schema::Result::Category 再び
@@ -483,7 +484,7 @@ Schema クラスのテストを書く
 - 作成日時(`created_at`)で降順にソートされている
 - 第一引数で取得する行数を指定できる
 
-それでは上の項目が満たされているかのテストを、`jobeet_schema_result_category.t` に追加していきましょう。
+それでは上の項目が満たされているかのテストを、`02_jobeet_schema_result_category.t` に追加していきましょう。
 
 まずはテスト用のデータを作ります。別ファイルにする方法もありますが、今回のようにユニットテストの場合はテスト用のデータがソース中に含まれている方が理解が容易なのでそうします。
 
@@ -607,33 +608,33 @@ Schema クラスのテストを書く
     use warnings;
     use utf8;
     use Test::More tests => 8;
-    
+
     use Jobeet::Test;
     use Jobeet::Models;
     use DateTime;
-    
+
     binmode(Test::More->builder->$_, ':utf8') for qw/failure_output output todo_output/;
-    
+
     {
         my $new_category = models('Schema::Category')->create({
             name => 'CamelCase',
         });
-    
+
         is $new_category->slug, 'camel_case', 'slug column: create slug column automatically';
-    
+
         $new_category->name('UpdatedCategoryName');
         $new_category->update;
-    
+
         is $new_category->slug, 'updated_category_name', 'slug column: update slug column automatically';
     }
-    
-    
+
+
     {
         my $job_rs = models('Schema::Job');
-    
+
         ## create test data
         my $design_category = models('Schema::Category')->create({ name => 'Design' });
-        
+
         my $design_job_1 = $job_rs->create({
             category_id  => $design_category->id,
             company      => "Company 1",
@@ -646,7 +647,7 @@ Schema クラスのテストを書く
             token        => "job_1",
             email        => 'job@example.com',
         });
-    
+
         my $design_job_2 = $job_rs->create({
             category_id  => $design_category->id,
             company      => "Company 2",
@@ -659,7 +660,7 @@ Schema クラスのテストを書く
             token        => "job_2",
             email        => 'job@example.com',
         });
-    
+
         my $design_job_3 = $job_rs->create({
             category_id  => $design_category->id,
             company      => "Company 3",
@@ -672,46 +673,46 @@ Schema クラスのテストを書く
             token        => "job_3",
             email        => 'job@example.com',
         });
-    
+
         ## do testing
         is $design_category->get_active_jobs->count, 3, 'get_active_jobs: 3つ登録したjobの習得';
-    
+
         {
             my $yesterday = models('Schema')->now->subtract( days => 1 );
             $design_job_2->update({ expires_at => $yesterday });
-    
+
             is $design_category->get_active_jobs->count, 2, 'get_active_jobs: $design_job_2 が期限切れになったので get_active_jobs の返り値に含まれなくなった';
         }
-    
+
         {
             my $now = models('Schema')->now;
             my $one_hour_ago = $now->clone->subtract( hours => 1);
             my $tomorrow = $now->clone->add( days => 1 );
-    
+
             $design_job_1->update({ created_at  => $now });
             $design_job_3->update({ created_at  => $one_hour_ago });
-    
+
             {
                 my $first_job = $design_category->get_active_jobs->first;
                 is $first_job->id, $design_job_1->id, 'get_active_jobs: $design_job_1が今、$design_job_3が1時間前に作られたので、$design_category->get_active_jobs->first は $design_job_1';
             }
-            
+
             $design_job_3->update({ created_at => $tomorrow });
-    
+
             {
                 my $first_job = $design_category->get_active_jobs->first;
                 is $first_job->id, $design_job_3->id, 'get_active_jobs: $design_job_3 が $design_job_1 より後に作られた事になったので、$design_category->get_active_jobs->first は $design_job_3';
             }
-            
+
         }
-    
+
         {
             is $design_category->get_active_jobs->count, 2, 'get_active_jobs: $design_categoryのアクティブなjobは2つ';
-    
+
             is $design_category->get_active_jobs({ rows => 1 })->count, 1, 'get_active_jobs: rowsパラメータで 1 を指定したので 1つだけ習得';
         }
      }
-    
+
     done_testing;
 
 それでは実行してみましょう。
@@ -732,10 +733,10 @@ Schema クラスのテストを書く
 今日頑張ってテストを書いたので、`t/` ディレクトリの下には
 
 - 00\_compile\.t
-- 01_jobeet\_test\.t
-- 02_jobeet\_schema\_result\_job\.t
-- 03_jobeet\_schema\_result_category\.t
-- 04jobeet\_schema\_resultset\_category\.t
+- jobeet\_test\.t
+- 01_jobeet\_schema\_result\_job\.t
+- 02_jobeet\_schema\_result_category\.t
+- 03_jobeet\_schema\_resultset\_category\.t
 
 の5つのテストがある状態になりました。
 全てのテストが成功し、プロジェクトが健全な状態にあるか確かめましょう。
