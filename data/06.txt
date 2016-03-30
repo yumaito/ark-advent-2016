@@ -199,21 +199,21 @@ Localアトリビュートはメソッド名にマッチします。
 
 ### Chained
 
-/job/{job_id}/edit のような複雑なURLを使いたい場合はChainedを使います。
+/job/{job_token}/edit のような複雑なURLを使いたい場合はChainedを使います。
 
     sub job :Chained('/') :PathPart :CaptureArgs(1) {
-        my ($self, $c, $job_id) = @_;
-        $c->stash->{job_id} = $job_id;
+        my ($self, $c, $job_token) = @_;
+        $c->stash->{job_token} = $job_token;
     }
 
-    # /job/{job_id}/edit
+    # /job/{job_token}/edit
     sub job_edit :Chained('job') :PathPart('edit') :Args(0) {
         my ($self, $c) = @_;
     }
 
 このとき、PathPartの値を省略するとメソッド名がPathPartの値になります。例えば、job_editメソッドは以下のように書くのと同じです。
 
-    # /job/{job_id}/edit
+    # /job/{job_token}/edit
     sub edit :Chained('job') :PathPart :Args(0) {
         my ($self, $c) = @_;
     }
@@ -380,9 +380,9 @@ Jobコントローラー
 
 以下のように他のアクションも定義していきましょう。
 
-    # /job/{job_id} （詳細）
+    # /job/{job_token} （詳細）
     sub show :Path :Args(1) {
-        my ($self, $c, $job_id) = @_;
+        my ($self, $c, $job_token) = @_;
     }
 
     # /job/create （新規作成）
@@ -391,16 +391,16 @@ Jobコントローラー
     }
 
     sub job :Chained('/') :PathPart :CaptureArgs(1) {
-        my ($self, $c, $job_id) = @_;
-        $c->stash->{job_id} = $job_id;
+        my ($self, $c, $job_token) = @_;
+        $c->stash->{job_token} = $job_token;
     }
 
-    # /job/{job_id}/edit （編集）
+    # /job/{job_token}/edit （編集）
     sub edit :Chained('job') :PathPart :Args(0) {
         my ($self, $c) = @_;
     }
 
-    # /job/{job_id}/delete （削除）
+    # /job/{job_token}/delete （削除）
     sub delete :Chained('job') :PathPart :Args(0) {
         my ($self, $c) = @_;
     }

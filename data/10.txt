@@ -11,7 +11,7 @@
 
     sub create :Local :Form('Jobeet::Form::Job') {
         my ($self, $c) = @_;
-    
+
         if ($c->req->method eq 'POST' and $self->form->submitted_and_valid) {
             # バリデーション成功、求人を生成する
         }
@@ -34,7 +34,7 @@ token は求人作成時に自動的に発行されるようにしましょう�
 
     sub create :Local :Form('Jobeet::Form::Job') {
         my ($self, $c) = @_;
-    
+
         if ($c->req->method eq 'POST' and $self->form->submitted_and_valid) {
             my $job = models('Schema::Job')->create_from_form($self->form);
             $c->redirect( $c->uri_for('/job', $job->token) );
@@ -45,23 +45,23 @@ token は求人作成時に自動的に発行されるようにしましょう�
 このコードを動作させるために ResultSet::Job に `create_from_form` メソッドを作成します：
 
     use Jobeet::Models;
-    
+
     sub create_from_form {
         my ($self, $form) = @_;
-    
+
         my $txn_guard = models('Schema')->txn_scope_guard;
-    
+
         my $category_id = delete $form->params->{category};
         my $category = models('Schema::Category')->find({ slug => $category_id })
             or die 'no such category_id: ', $category_id;
-    
+
         my $job = $self->create({
             category_id => $category->id,
             %{ $form->params },
         });
-    
+
         $txn_guard->commit;
-    
+
         $job;
     }
 
@@ -71,7 +71,7 @@ token は求人作成時に自動的に発行されるようにしましょう�
 
     sub show :Path :Args(1) {
         my ($self, $c, $job_token) = @_;
-    
+
         $c->stash->{job} = models('Schema::Job')->find({ token => $job_token })
             or $c->detach('/default');
     }
@@ -80,36 +80,36 @@ URLでうけとった token をもとに求人をさがし、みつかったら 
 求人情報のページのテンプレート `job/show.mt` も作成しておきましょう:
 
     ? my $job = $c->stash->{job};
-    
+
     ? extends 'common/base';
-    
+
     ? block stylesheets => sub {
     <link rel="stylesheet" type="text/css" href="<?= $c->uri_for('/css/main.css') ?>" />
     <link rel="stylesheet" type="text/css" href="<?= $c->uri_for('/css/job.css') ?>" />
     ? }
-    
+
     ? block content => sub {
-    
+
     <div id="job">
       <h1><?= $job->company ?></h1>
       <h2><?= $job->location ?></h2>
       <h3>
         <?= $job->category->name ?>    <small> - <?= $job->type ?></small>
       </h3>
-    
+
       <div class="description">
         <?= $job->description ?>
       </div>
-    
+
       <h4>How to apply?</h4>
-    
+
       <p class="how_to_apply"><?= $job->how_to_apply ?></p>
-    
+
       <div class="meta">
         <small>posted on <?= $job->created_at->ymd ?></small>
       </div>
     </div>
-    
+
     ? } # endblock content
 
 この状態でフォームにアクセスし、なにか求人を作成してみてください。
@@ -119,7 +119,7 @@ URLでうけとった token をもとに求人をさがし、みつかったら 
 ここで、編集画面ではまた同じようなフォームをつくるでしょう。フォーム部分は `job/_partial_form.mt` としてパーシャル化しておきましょう：
 
     ? my $form = shift;
-    
+
     <form method="post">
     <table id="job_form">
       <tfoot>
@@ -152,45 +152,45 @@ URLでうけとった token をもとに求人をさがし、みつかったら 
 これを使用すると create.mt はこのようになるでしょう：
 
     ? my $form = $c->stash->{form};
-    
+
     ? extends 'common/jobs_base';
-    
+
     ? block content => sub {
-    
+
     <h1>New Job</h1>
-    
+
     ?= include('job/_partial_form', $form);
-    
+
     ? } # endblock content
 
 同様に編集用のテンプレート `job/edit.mt` はこのようになるでしょう：
 
     ? my $form = $c->stash->{form};
-    
+
     ? extends 'common/jobs_base';
-    
+
     ? block content => sub {
-    
+
     <h1>Edit Job</h1>
-    
+
     ?= include('job/_partial_form', $form);
-    
+
     ? } # endblock content
 
 それではつぎに編集用のコントローラを作成していきましょう：
 
     sub job :Chained('/') :PathPart :CaptureArgs(1) {
         my ($self, $c, $job_token) = @_;
-    
+
         $c->stash->{job} = models('Schema::Job')->find({ token => $job_token })
             or $c->detach('/default');
     }
-    
+
     sub edit :Chained('job') :PathPart :Form('Jobeet::Form::Job') {
         my ($self, $c) = @_;
-    
+
         my $job = $c->stash->{job};
-    
+
         if ($c->req->method eq 'POST') {
             if ($self->form->submitted_and_valid) {
                 $job->update_from_form($self->form);
@@ -217,7 +217,7 @@ POST メソッド以外のリクエストの場合はフォームをDBの内容�
 
     sub delete :Chained('job') :PathPart {
         my ($self, $c) = @_;
-    
+
         $c->stash->{job}->delete;
         $c->redirect( $c->uri_for('/job') );
     }
@@ -234,7 +234,7 @@ POST メソッド以外のリクエストの場合はフォームをDBの内容�
           <li><a href="<?= $c->uri_for('/job', $job->token, 'publish') ?>">Publish</a></li>
     ? }
         <li><a href="<?= $c->uri_for('/job', $job->token, 'delete') ?>" onclick="return confirm('Are you sure?')">Delete</a></li>
-    
+
     ? if ($job->is_activated) {
         <li<?= $job->expires_soon ? ' class="expires_soon"' : '' ?>>
     ? if ($job->is_expired) {
@@ -242,7 +242,7 @@ POST メソッド以外のリクエストの場合はフォームをDBの内容�
     ? } else {
               Expires in <strong><?= $job->days_before_expired ?></strong> days
     ? }
-    
+
     ? if ($job->expires_soon) {
              - <a href="">Extend</a> for another <?= Jobeet::Models->get('conf')->{active_days} ?> days
     ? }
@@ -263,12 +263,12 @@ POST メソッド以外のリクエストの場合はフォームをDBの内容�
         my ($self) = @_;
         $self->days_before_expired < 0;
     }
-    
+
     sub days_before_expired {
         my ($self) = @_;
         ($self->expires_at - models('Schema')->now)->days;
     }
-    
+
     sub expires_soon {
         my ($self) = @_;
         $self->days_before_expired < 5;
@@ -288,9 +288,9 @@ POST メソッド以外のリクエストの場合はフォームをDBの内容�
 
     sub publish :Chained('job') :PathPart {
         my ($self, $c) = @_;
-    
+
         my $job = $c->stash->{job};
-    
+
         $job->publish;
         $c->redirect( $c->uri_for('/job', $job->token) );
     }
@@ -313,7 +313,7 @@ POST メソッド以外のリクエストの場合はフォームをDBの内容�
     sub get_active_jobs {
         my $self = shift;
         my $attr = shift || {};
-    
+
         $self->jobs(
             { expires_at => { '>=', models('Schema')->now }, is_activated => 1 },
             {   order_by => { -desc => 'created_at' },
@@ -333,4 +333,3 @@ POST メソッド以外のリクエストの場合はフォームをDBの内容�
 今日のチュートリアルにはたくさんの新しい情報が詰め込まれていましたが、Ark のフォームフレームワークをより理解していただけることを願っています。
 
 明日からはプログラミングで最も重要なテストについて学びはじめます。
-
