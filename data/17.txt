@@ -14,7 +14,7 @@ Jobeet のフィード追加に関して、求職者はリアルタイムで新�
 新たなモジュール
 ----------------
 
-今回は、JSON::Anyが新たに必要になります。cpanmで入れておきましょう。Makefile.PLへの追記も忘れずに。
+今回は、JSON::Anyが新たに必要になります。`cpanfile` への追記も忘れずに。
 
 
 フィクスチャ
@@ -33,7 +33,7 @@ Jobeet のフィード追加に関して、求職者はリアルタイムで新�
             category_id => models('Schema::Category')->find({ name => 'Programming' })->id,
         });
     }
-    
+
     {
         my $affiliate = models('Schema::Affiliate')->create({
             url       => 'http://www.symfony-project.org/',
@@ -53,20 +53,20 @@ Jobeet のフィード追加に関して、求職者はリアルタイムで新�
     # Jobeet/Schema/Result/Affiliate.pm
     use Digest::SHA1 qw/sha1_hex/;
     use Data::UUID;
-    
+
     sub insert {
         my $self = shift;
-    
+
         $self->token(sha1_hex(Data::UUID->new->create))
             unless $self->token;
-    
+
         $self->next::method(@_);
     }
 
 デフォルトデータを作り直しておきましょう：
 
     $ rm database.db
-    $ perl ./script/dev/upgrade_database.pl
+    $ perl ./script/dev/migrate.pl
     $ perl ./script/dev/insert_default_data.pl
 
 
@@ -77,24 +77,24 @@ Jobeet のフィード追加に関して、求職者はリアルタイムで新�
 
     package Jobeet::Controller::API;
     use Ark 'Controller';
-    
+
     use Jobeet::Models;
-    
+
     sub token :Chained('/') :PathPart('api') :CaptureArgs(1) {
         my ($self, $c, $token) = @_;
-    
+
         $c->detach('/default') unless length $token == 40;
-    
+
         my $affiliate = models('Schema::Affiliate')->single({ token => $token })
             or $c->detach('/default');
-    
+
         $c->stash->{affiliate} = $affiliate;
     }
-    
+
     sub jobs :Chained('token') :Args(0) {
         my ($self, $c) = @_;
     }
-    
+
     1;
 
 このコントローラでは `/api/{token}/jobs` という URL を定義しています。
@@ -107,7 +107,7 @@ JSON 形式のデータを出力するためには Ark::View::JSON というビ�
 
     package Jobeet::View::JSON;
     use Ark 'View::JSON';
-    
+
     has '+expose_stash' => (
         default => 'json',
     );
@@ -120,11 +120,11 @@ JSON 形式のデータを出力するためには Ark::View::JSON というビ�
 
     sub jobs :Chained('token') :Args(0) {
         my ($self, $c) = @_;
-    
+
         my $json = [];
         my $affiliate = $c->stash->{affiliate};
         my $max_rows  = models('conf')->{max_jobs_on_homepage};
-    
+
         for my $category ($affiliate->categories) {
             for my $job ($category->get_active_jobs({ rows => $max_rows })->all) {
                 push @$json, {
@@ -140,15 +140,15 @@ JSON 形式のデータを出力するためには Ark::View::JSON というビ�
                 };
             }
         }
-    
+
         $c->stash->{json} = $json;
     }
-    
+
 このままでは '/end' に処理が渡され、そこでは `View::MT` に処理が飛んでしまうため、この API 階層で再度 end を定義し上書きして View::JSON に処理が飛ぶようにします。
 
     sub end :Private {
         my ($self, $c) = @_;
-    
+
         if ($c->stash->{json}) {
             $c->forward( $c->view('JSON') );
         }
@@ -160,37 +160,38 @@ JSON 形式のデータを出力するためには Ark::View::JSON というビ�
 Web サービスのテスト
 ------------------
 
+`t/controller/api.t` というファイルを作成して
 Webサービスをテストを書いておきましょう：
 
     use strict;
     use warnings;
-    
+
     use Test::More;
     use Jobeet::Test;
     use Jobeet::Models;
     use JSON;
-    
+
     my $datafile = models('home')->subdir(qw/sql fixtures/)->file('default.pl');
     do $datafile or die $!;
-    
+
     {
         my $res = request( GET => '/api/foo/jobs' );
         is $res->code, 404, '404 ok';
     }
-    
+
     {
         my $data = models('Schema::Affiliate')->single({});
-    
+
         my $res = request( GET => '/api/' . $data->token . '/jobs' );
         is $res->code, 200, '200 ok';
         like $res->content_type, qr!application/json!, 'content_type ok';
-    
+
         my $json = from_json($res->content);
         is $json->[0]{category}, $data->categories->first->name, 'category ok';
     }
-    
+
     done_testing;
-    
+
 
 テストを書いたらちゃんと動かしておきましょう。
 
