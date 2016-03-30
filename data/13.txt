@@ -17,7 +17,7 @@
 
     done_testing;
 
-まずテストを書くために `Test::More` を use し、フォームリクエストを作るために `CGI::Simple` を `use` します。
+まずテストを書くために `Test::More` を use し、フォームリクエストを作るために `CGI::Simple` を `cpanfile` に追加/インストール した後 `use` します。
 
 そして `use_ok` 関数で目的のフォームクラス（Jobeet::Form::Job）がちゃんと use できるかをまずテストします。
 
@@ -29,7 +29,7 @@
 
 まずはフォームがただしく投稿された場合のテストを書いてみましょう。
 
-`job.t` の `done_testing の手前に以下のコードを追加します。
+`05_form_job.t` の `done_testing の手前に以下のコードを追加します。
 
     {
         my $f = Jobeet::Form::Job->new(
