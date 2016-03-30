@@ -96,7 +96,7 @@ Arkを使ったプロジェクトのテストには、CPAN上にある数多のT
     use Jobeet::Models;
 
 `Jobeet::Test` が `use` された後に、設定ファイルのデータベース接続先がテスト様に作られた物になっているかを確かめます。
-`jobeet_test.t` を `t/` ディレクトリ以下に作成し、以下のスクリプトを書き込みます。
+`01_jobeet_test.t` を `t/` ディレクトリ以下に作成し、以下のスクリプトを書き込みます。
 
     use strict;
     use warnings;
@@ -131,7 +131,7 @@ prove コマンドには、よく使われるいくつかのオプションが�
 
 
 それでは、先程書いた jobeet_test.t を実行してみましょう!
-Jobeetプロジェクトのrootディレクトリに移動して、`prove -lr t/jobeet_test.t`を実行します。
+Jobeetプロジェクトのrootディレクトリに移動して、`prove -lr t/01_jobeet_test.t`を実行します。
 
     $ carton exec prove -l t/01_jobeet_test.t
 
@@ -162,7 +162,7 @@ Schema クラスのテストを書く
 新しい `category` を作成して、それに付随する `job` を作ります。
 
 新しくできた `job` は `Jobeet::Schema::Result::Job` オブジェクトであるべきなので、先程 `Test::More` の説明で出て来た `isa_ok` を使用して確認します。
-`t/` 以下に `01_jobeet_schema_result_job.t` というファイルを作りましょう｡
+`t/` 以下に `02_jobeet_schema_result_job.t` というファイルを作りましょう｡
 コードは次のようになります。
 
     use strict;
@@ -196,9 +196,9 @@ Schema クラスのテストを書く
 
 それでは実行してみましょう。
 
-    $ prove -l t/01_jobeet_schema_result_job.t
+    $ carton exec prove -l t/02_jobeet_schema_result_job.t
 
-    t/jobeet_schema_result_job.t .. ok
+    t/02_jobeet_schema_result_job.t .. ok
     All tests successful.
     Files=1, Tests=1,  2 wallclock secs ( 0.02 usr  0.01 sys +  0.55 cusr  0.07 csys =  0.65 CPU)
     Result: PASS
@@ -220,7 +220,7 @@ Schema クラスのテストを書く
 
 それでは、実行してみます。
 
-    $ prove -l t/01_jobeet_schema_result_job.t
+    $ carton exec prove -l t/02_jobeet_schema_result_job.t
 
     t/jobeet_schema_result_job.t .. ok
     All tests successful.
@@ -230,7 +230,7 @@ Schema クラスのテストを書く
 おめでとうございます!! 全てのテストが通りました。
 良い区切りなので、testsの数が 4 だということを`Test::More`に教えてあげます。
 
-最終的に `01_jobeet_schema_result_job.t` は次のようになりました。
+最終的に `02_jobeet_schema_result_job.t` は次のようになりました。
 
     use strict;
     use warnings;
@@ -282,7 +282,7 @@ Schema クラスのテストを書く
 若者は喜び、`Jobeet`を利用しているユーザーはサービスが安定して動いてる事に満足を得てくれるでしょう。
 
 さあ、テストを書いていきましょう。
-`02_jobeet_schema_result_category.t` ファイルを作り、そこに `Jobeet::Schema::Result::Category` のテストを書いていきます。
+`03_jobeet_schema_result_category.t` ファイルを作り、そこに `Jobeet::Schema::Result::Category` のテストを書いていきます。
 
 まず始めに、`insert` 時に `slug` カラムが適切に作られているかをテストします。
 
@@ -305,9 +305,9 @@ Schema クラスのテストを書く
 
 実行してみます。
 
-    $ prove -lr t/02_jobeet_schema_result_category.t
+    $ carton exec prove -lr t/03_jobeet_schema_result_category.t
 
-    t/02_jobeet_schema_result_category.t .. ok
+    t/03_jobeet_schema_result_category.t .. ok
     All tests successful.
     Files=1, Tests=1,  1 wallclock secs ( 0.03 usr  0.01 sys +  0.50 cusr  0.08 csys =  0.62 CPU)
     Result: PASS
@@ -323,7 +323,7 @@ Schema クラスのテストを書く
 
 再度、実行してみます。
 
-    $ prove -lr t/02_jobeet_schema_result_category.t
+    $ carton exec prove -lr t/03_jobeet_schema_result_category.t
 
     t/jobeet_schema_result_category.t .. ok
     All tests successful.
@@ -332,7 +332,7 @@ Schema クラスのテストを書く
 
 最後にテストの数を`Test::More`に教えてあげます。
 
-最終的に `02_jobeet_schema_result_category.t` のコードは、次のようになりました。
+最終的に `03_jobeet_schema_result_category.t` のコードは、次のようになりました。
 
     use strict;
     use warnings;
@@ -362,7 +362,7 @@ Schema クラスのテストを書く
 ### Jobeet::Schema::ResultSet::Category
 
 
-`03_jobeet_schema_resultset_category.t`ファイルを作り、`Jobeet::Schema::ResultSet::Category`のテストを書いていきます。
+`04_jobeet_schema_resultset_category.t`ファイルを作り、`Jobeet::Schema::ResultSet::Category`のテストを書いていきます。
 
 
 まずはテストに使うデータを作成します。
@@ -410,9 +410,9 @@ Schema クラスのテストを書く
 
 テストを実行します。
 
-    prove -l t/03_jobeet_schema_resultset_category.t
+    carton exec prove -l t/04_jobeet_schema_resultset_category.t
 
-    t/jobeet_schema_resultset_category.t .. ok
+    t/04_jobeet_schema_resultset_category.t .. ok
     All tests successful.
     Files=1, Tests=3,  1 wallclock secs ( 0.02 usr  0.00 sys +  0.55 cusr  0.07 csys =  0.64 CPU)
     Result: PASS
@@ -602,7 +602,7 @@ Schema クラスのテストを書く
 
 テスト数が増えたので、`Test::More` に数を教えてあげましょう。`use Test::More tests => 8;` に変更します。
 
-最終的に `jobeet_schema_result_category.t` の全コードは次のようになりました。
+最終的に `03_jobeet_schema_result_category.t` の全コードは次のようになりました。
 
     use strict;
     use warnings;
@@ -717,9 +717,9 @@ Schema クラスのテストを書く
 
 それでは実行してみましょう。
 
-    $ prove -l t/jobeet_schema_result_category.t
+    $ carton exec prove -l t/03_jobeet_schema_result_category.t
 
-    t/jobeet_schema_result_category.t .. ok
+    t/03_jobeet_schema_result_category.t .. ok
     All tests successful.
     Files=1, Tests=8,  1 wallclock secs ( 0.02 usr  0.01 sys +  0.58 cusr  0.07 csys =  0.68 CPU)
     Result: PASS
@@ -733,10 +733,10 @@ Schema クラスのテストを書く
 今日頑張ってテストを書いたので、`t/` ディレクトリの下には
 
 - 00\_compile\.t
-- jobeet\_test\.t
-- 01_jobeet\_schema\_result\_job\.t
-- 02_jobeet\_schema\_result_category\.t
-- 03_jobeet\_schema\_resultset\_category\.t
+- 01_jobeet\_test\.t
+- 02_jobeet\_schema\_result\_job\.t
+- 03_jobeet\_schema\_result_category\.t
+- 04_jobeet\_schema\_resultset\_category\.t
 
 の5つのテストがある状態になりました。
 全てのテストが成功し、プロジェクトが健全な状態にあるか確かめましょう。
