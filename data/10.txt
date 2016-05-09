@@ -319,7 +319,7 @@ POST メソッド以外のリクエストの場合はフォームをDBの内容�
         my $attr = shift || {};
 
         $self->jobs(
-            { expires_at => { '>=', models('Schema')->now }, is_activated => 1 },
+            { expires_at => { '>=', models('Schema')->now->strftime("%F %T") }, is_activated => 1 },
             {   order_by => { -desc => 'created_at' },
                 defined $attr->{rows} ? ( rows => $attr->{rows} ) : (),
                 defined $attr->{page} ? ( page => $attr->{page} ) : (),
